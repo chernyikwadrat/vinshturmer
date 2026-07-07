@@ -1,0 +1,445 @@
+@font-face{font-family:'HN';font-weight:700;src:url('../assets/fonts/HN-Bold.otf') format('opentype');}
+@font-face{font-family:'HN';font-weight:500;src:url('../assets/fonts/HN-Medium.otf') format('opentype');}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;background:#000;}
+body{font-family:'HN',sans-serif;-webkit-font-smoothing:antialiased;}
+
+/* ── screen 1 ── */
+#screen1{position:relative;height:100vh;overflow:hidden;}
+
+/* ── backgrounds ── */
+#bg-wrap{position:absolute;inset:0;z-index:0;}
+.bg-img{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:cover;object-position:center;
+  opacity:0;
+}
+.bg-img.on{opacity:1;}
+
+/* ── figure (no-bg turntable) ── */
+#fig-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);height:82vh;width:calc(82vh * 683 / 1024);z-index:10;}
+#fig-wrap img{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:contain;object-position:bottom center;
+  display:none;pointer-events:none;
+}
+#fig-wrap img.on{display:block;}
+
+/* ── header ── */
+#header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:12px 32px;font-size:13px;font-weight:700;letter-spacing:-.01em;text-transform:uppercase;color:#000;background:#fff;}
+#header.no-bg{background:transparent;}
+
+/* dev-only toggle, top-left, stays clear of the header/rail */
+#reveal-toggle{
+  position:fixed;top:44px;left:8px;z-index:60;
+  background:#fff;border:1px solid #000;border-radius:4px;padding:4px 8px;
+  font-family:sans-serif;font-size:11px;color:#000;
+  display:flex;align-items:center;gap:6px;cursor:pointer;
+}
+body.reveal-off .c-collage-img{opacity:1 !important;}
+
+/* dev-only toggle: pick a scroll transition style for the look blocks */
+#scroll-mode-toggle{
+  position:fixed;top:76px;left:8px;z-index:60;
+  background:#fff;border:1px solid #000;border-radius:4px;padding:6px 8px;
+  font-family:sans-serif;font-size:11px;color:#000;
+  display:flex;flex-direction:column;gap:4px;
+}
+#scroll-mode-toggle label{display:flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;}
+
+/* snap + crossfade: the actual page scroller (html) snaps to the start of
+   each look canvas; canvases without scroll-snap-align (screen1, gallery)
+   are simply not snap targets, so normal scroll continues through them
+   unaffected. */
+html[data-scroll-mode="fade"]{
+  scroll-snap-type:y mandatory;
+}
+html[data-scroll-mode="fade"] #concept-canvas,
+html[data-scroll-mode="fade"] .concept-canvas{
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+  transition:opacity .1s linear;
+}
+
+/* sticky photo scrub: each look gets a tall spacer after its canvas; while
+   scrolling through that spacer the photo pins center-screen and flips
+   frames based on scroll progress instead of a timer. Only active in this
+   mode — hidden (and the original timer-driven photo hidden) otherwise. */
+.sticky-scrub-zone{display:none;position:relative;height:280vh;}
+html[data-scroll-mode="scrub"] .sticky-scrub-zone{display:block;}
+/* margin-top (pulling the zone up flush against its look's real content,
+   with no dead scroll before it) is computed live in main.js — see
+   updateScrubZoneOffsets */
+html[data-scroll-mode="scrub"] #concept-photo,
+html[data-scroll-mode="scrub"] #concept-photo-2,
+html[data-scroll-mode="scrub"] #concept-photo-3,
+html[data-scroll-mode="scrub"] #concept-photo-4,
+html[data-scroll-mode="scrub"] #concept-photo-5,
+html[data-scroll-mode="scrub"] #concept-photo-6{
+  display:none;
+}
+.sticky-scrub-inner{
+  position:sticky;top:0;height:100vh;
+  display:flex;align-items:center;justify-content:center;
+}
+.sticky-scrub-photo{position:relative;}
+.sticky-scrub-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:none;}
+.sticky-scrub-photo img.on{display:block;}
+/* same box sizes as each look's original photo (in vw, so aspect holds at any width):
+   a = 300x200 (looks 1, 3); b = 400x600 (looks 2, 5); c = 980x600 (looks 4, 6) */
+.scrub-size-a{width:20.83vw;height:13.89vw;}
+.scrub-size-b{width:27.78vw;height:41.67vw;}
+.scrub-size-c{width:68.06vw;height:41.67vw;}
+
+/* fixed "LOOK N" nav, vertically centered on screen, visible only while
+   scrolling through the concept section; active look highlighted in black,
+   the rest faded — mirrors the same look-tracking used by the rail thumbnail */
+.look-nav{
+  position:fixed;top:50%;left:0;right:0;transform:translateY(-50%);
+  z-index:15;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:0 32px;
+  pointer-events:none;
+  opacity:0;
+}
+.look-nav.in-view{opacity:1;}
+.look-nav-item{
+  font-family:'HN',sans-serif;font-weight:700;font-size:13px;
+  letter-spacing:-.01em;text-transform:uppercase;
+  color:rgba(0,0,0,.1);
+}
+.look-nav-item.active{color:#000;}
+#header .nav-left{display:flex;gap:32px;}
+#header a{text-decoration:none;color:#000;cursor:pointer;opacity:.7;}
+#header a:hover{opacity:1;}
+#header .brand{
+  position:absolute;left:50%;transform:translateX(-50%);
+  font-weight:700;
+}
+
+.caption{
+  position:absolute;
+  z-index:25;
+  text-align:center;
+  color:#fff;
+  mix-blend-mode:difference;
+  pointer-events:none;
+}
+.caption-centered{top:50%;left:50%;transform:translate(-50%,-50%);}
+.caption-bottom{bottom:24px;left:50%;transform:translateX(-50%);}
+.caption .line1{
+  display:block;
+  font-size:11px;font-weight:700;
+  letter-spacing:0;text-transform:uppercase;
+  opacity:.7;
+  margin-bottom:4px;
+}
+.caption .line2{
+  display:block;
+  font-size:11px;font-weight:700;
+  letter-spacing:3em;text-transform:uppercase;
+  opacity:.7;
+}
+
+/* ── placeholder block, to be filled in later ── */
+#placeholder-block{height:100vh;background:#fff;}
+
+/* ── screen 2: gallery grid ── */
+#gallery{
+  position:relative;
+  padding-bottom: 5%;
+  height:100vh;
+  background:#fff;
+}
+#grid-wrap{
+  height:100%;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(2,1fr);
+}
+.grid-item{
+  position:relative;
+  cursor:grab;
+  touch-action:none;
+  transition:opacity .3s;
+}
+.grid-item:active{cursor:grabbing;}
+#grid-wrap.dragging .grid-item:not(.active){opacity:.3;}
+.grid-item img{
+  position:absolute;
+  left:50%;bottom:0;
+  height:88%;
+  width:auto;
+  max-width:100%;
+  object-fit:contain;
+  display:none;
+  pointer-events:none;
+}
+.grid-item img.on{display:block;}
+
+/* ── concept ──
+   Whole block is one proportional canvas (1440x3200 reference, ~1:2.222 ratio)
+   so the overlapping/staggered collage scales as a unit at any width. */
+#concept{background:#fff;padding-top:64px;}
+#concept-canvas,.concept-canvas{position:relative;width:100%;padding-top:222.22%;}
+#concept-canvas > *,.concept-canvas > *{position:absolute;}
+
+#concept-text{
+  left:50%;top:.3%;width:49.24%;z-index:3;
+  font-size:clamp(10px,.9vw,13px);font-weight:500;
+  letter-spacing:-.01em;text-align:justify;color:#000;
+}
+
+.c-collage-img{
+  width:37.01%;height:25%;object-fit:cover;object-position:center;
+  opacity:0;
+}
+.c-collage-img.revealed{opacity:1;}
+/* the col-* clusters (pre-composed collage images, not single garment
+   crops) are always visible — no scroll-reveal fade for these, unlike the
+   m-* photos above */
+.c-collage-img.c-col{opacity:1;}
+.cm1{left:6.25%;top:.31%;width:37.01%;height:25%;object-fit:cover;object-position:center;z-index:2;}
+.cm2{left:25.49%;top:6.88%;z-index:3;}
+.cm3{left:60%;top:40.53%;z-index:4;}
+.cm4{left:53.06%;top:57.06%;z-index:5;}
+.c1-col{left:44%;top:13%;width:11%;height:4.52%;object-fit:contain;z-index:2;}
+
+/* width:45.83% (canvas-%) and height:90vh (viewport-%) used to scale
+   independently, so at most real window sizes their ratio didn't match
+   the photo's, leaving a bare gap on the left/right where the box's own
+   background showed through instead of the photo. aspect-ratio locks the
+   box to the photo's own ratio (683:1024, same as the -fill exports) off
+   the authoritative height:90vh, so object-fit:contain always fills it
+   exactly with no gap. left is 50%+translateX(-50%) instead of a fixed
+   27.08% since the width is now derived from height and varies with
+   viewport — a fixed left percent would no longer land it in the same
+   centered spot the old 27.08%+45.83%/2 did. overflow:hidden stays as a
+   defensive clip (there shouldn't be any overflow to catch now that the
+   box is exactly aspect-matched, but costs nothing to keep). */
+#concept-turn{left:50%;top:27.34%;height:90vh;aspect-ratio:683/1024;transform:translateX(-50%);z-index:1;cursor:grab;touch-action:none;overflow:hidden;}
+#concept-turn.active{cursor:grabbing;}
+#concept-turn img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:bottom center;display:none;pointer-events:none;}
+#concept-turn img.on{display:block;}
+
+.c-photo{left:39.58%;top:82.81%;width:20.83%;height:6.25%;}
+.c-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:none;pointer-events:none;}
+.c-photo img.on{display:block;}
+
+/* ── concept: look 2 block (same canvas system, patterns, and reveal/snap
+   behavior as the look 1 block above) ── */
+.concept-text2{
+  left:50%;top:5%;width:49.24%;z-index:3;
+  font-size:clamp(10px,.9vw,13px);font-weight:500;
+  letter-spacing:-.01em;text-align:justify;color:#000;
+}
+
+.c2-xl{left:.76%;top:15.875%;width:78.4%;height:55.875%;z-index:2;mix-blend-mode:multiply;overflow:hidden;}
+.c2-xl img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.c2-m2{left:65.76%;top:34.97%;width:23.13%;height:15.625%;z-index:3;mix-blend-mode:multiply;}
+.c2-m3{left:60.14%;top:56.125%;width:23.13%;height:15.625%;z-index:4;mix-blend-mode:multiply;}
+.c2-col{left:66%;top:5.5%;width:20%;height:5.86%;object-fit:contain;z-index:3;}
+
+.c2-turn{left:0;top:0;width:45.83%;height:30.94%;z-index:1;cursor:grab;touch-action:none;}
+.c2-turn.active{cursor:grabbing;}
+.c2-turn img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:bottom center;display:none;pointer-events:none;}
+.c2-turn img.on{display:block;}
+
+.c2-photo{left:36.11%;top:76.5625%;width:27.78%;height:18.75%;}
+
+/* ── concept: look 3 block ── */
+.concept-text3{
+  left:50%;top:2%;width:49.24%;z-index:3;
+  font-size:clamp(10px,.9vw,13px);font-weight:500;
+  letter-spacing:-.01em;text-align:justify;color:#000;
+}
+.c3-turn{left:0;top:0;width:45.83%;height:30.94%;z-index:1;cursor:grab;touch-action:none;}
+.c3-turn.active{cursor:grabbing;}
+.c3-turn img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:bottom center;display:none;pointer-events:none;}
+.c3-turn img.on{display:block;}
+
+.c3-xl{left:23.4%;top:30.94%;width:66.875%;height:49.8125%;z-index:2;overflow:hidden;}
+.c3-xl img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;}
+.c3-m1{left:8.89%;top:31.5625%;width:24.93%;height:16.8125%;z-index:3;mix-blend-mode:multiply;}
+.c3-m2{left:21.39%;top:35.6875%;width:21.875%;height:14.75%;z-index:4;mix-blend-mode:multiply;}
+.c3-m3{left:1.39%;top:65.125%;width:24.93%;height:16.8125%;z-index:5;mix-blend-mode:multiply;}
+.c3-col{right:0%;top:3%;width:25%;height:16.94%;object-fit:contain;z-index:6;}
+
+.c3-photo{left:39.58%;top:82.8125%;width:20.83%;height:6.25%;}
+
+/* ── concept: look 4 block ── */
+.concept-text4{
+  left:50%;top:3%;width:49.24%;z-index:3;
+  font-size:clamp(10px,.9vw,13px);font-weight:500;
+  letter-spacing:-.01em;text-align:justify;color:#000;
+}
+.c4-turn{left:0;top:0;width:45.83%;height:30.94%;z-index:1;cursor:grab;touch-action:none;}
+.c4-turn.active{cursor:grabbing;}
+.c4-turn img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:bottom center;display:none;pointer-events:none;}
+.c4-turn img.on{display:block;}
+
+.c4-m1{left:30.28%;top:38.75%;width:23.125%;height:15.625%;z-index:2;}
+.c4-m2{left:38.47%;top:43.375%;width:23.125%;height:15.625%;z-index:3;}
+.c4-m3{left:46.6%;top:45.25%;width:23.125%;height:15.625%;z-index:4;}
+.c4-m4{left:33.26%;top:50.34%;width:23.125%;height:15.625%;z-index:5;}
+.c4-m5{left:61.6%;top:56.28%;width:23.125%;height:15.625%;z-index:6;transform:scaleX(-1);}
+.c4-col1{left:3%;top:7%;width:46%;height:26.67%;object-fit:contain;z-index:0;}
+.c4-col2{right:0%;top:15%;width:58%;height:25.87%;object-fit:contain;z-index:0;}
+.c4-photo{left:15.97%;top:76.5625%;width:68.06%;height:18.75%;z-index:7;}
+
+/* ── concept: look 5 block (turntable uses the real background-fill frames,
+   like look 1's) ── */
+.concept-text5{
+  left:50%;top:.3%;width:49.24%;z-index:3;
+  font-size:clamp(10px,.9vw,13px);font-weight:500;
+  letter-spacing:-.01em;text-align:justify;color:#000;
+}
+/* width/height here are both %-of-canvas, so they scale together and stay
+   aspect-matched to the photo (683:1024) unlike #concept-turn's old vh mix —
+   overflow:hidden is just a defensive clip, not covering a real gap */
+.c5-turn{left:0;top:0;width:45.83%;height:30.94%;z-index:1;cursor:grab;touch-action:none;overflow:hidden;}
+.c5-turn.active{cursor:grabbing;}
+.c5-turn img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:bottom center;display:none;pointer-events:none;}
+.c5-turn img.on{display:block;}
+
+.c5-m1{left:0;top:26.25%;width:37.01%;height:25%;z-index:2;}
+.c5-m2{left:17.64%;top:32.4375%;width:37.01%;height:25%;z-index:3;}
+.c5-m3{left:33.06%;top:41.22%;width:37.01%;height:25%;z-index:4;}
+.c5-m4{left:37%;top:46.34%;width:37.01%;height:25%;z-index:5;}
+.c5-col1{left:24%;top:26%;width:25%;height:13.42%;object-fit:contain;z-index:0;}
+.c5-col2{left:52%;top:40%;width:17%;height:13.21%;object-fit:contain;z-index:0;}
+.c5-photo{left:36.11%;top:76.5625%;width:27.78%;height:18.75%;z-index:6;}
+
+/* ── concept: look 6 block (turntable uses the real background-fill frames) ── */
+.concept-text6{
+  left:50%;top:.3%;width:49.24%;z-index:3;
+  font-size:clamp(10px,.9vw,13px);font-weight:500;
+  letter-spacing:-.01em;text-align:justify;color:#000;
+}
+/* same aspect-matched %-of-canvas sizing as .c5-turn above —
+   overflow:hidden is just a defensive clip, not covering a real gap */
+.c6-turn{left:0;top:0;width:45.83%;height:30.94%;z-index:1;cursor:grab;touch-action:none;overflow:hidden;}
+.c6-turn.active{cursor:grabbing;}
+.c6-turn img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:bottom center;display:none;pointer-events:none;}
+.c6-turn img.on{display:block;}
+
+/* the raw Figma coords for 6-m-3/6-m-4 put them almost fully on top of one
+   another (854px vs 846px apart) — a data glitch, not the intended layout.
+   The mockup shows an evenly spaced, non-overlapping row instead. */
+.c6-row{left:0;top:47.34%;width:100%;height:12.5%;z-index:2;display:flex;align-items:flex-end;justify-content:space-evenly;}
+.c6-row img{position:static;width:15%;height:100%;object-fit:contain;object-position:bottom center;}
+.c6-m3{transform:scaleX(-1);}
+.c6-col{left:0%;top:12%;width:100%;height:auto;object-fit:contain;z-index:1;}
+.c6-photo{left:15.97%;top:76.5625%;width:68.06%;height:18.75%;}
+
+@media (max-width:700px){
+  .concept-text2,.concept-text3,.concept-text4,.concept-text5,.concept-text6{left:6%;width:88%;text-align:left;}
+}
+
+/* six-look rail: only the bottom-right thumbnail (look 3) shows by default,
+   fixed to the bottom of the SCREEN (viewport, not the section's own box —
+   see the #concept-canvas > selector, which beats the ID-anchored
+   `#concept-canvas > *{position:absolute}` rule on specificity). It only
+   becomes visible once the concept section is scrolled into view (toggled
+   in main.js via IntersectionObserver), then stays pinned to the viewport
+   bottom for as long as concept is on screen. Hovering the cluster (the
+   exact bounding box of the 6 thumbnails, not the full backdrop) reveals the
+   other five over a full-width translucent white scrim that is purely
+   visual — the scrim itself has pointer-events:none so mousing over the
+   empty page around it doesn't keep the panel open; only leaving the
+   cluster box closes it. */
+#concept-canvas > .c-rail-cluster{
+  position:fixed;bottom:24px;right:.75vw;width:24.39vw;height:60.31vw;
+  z-index:10;
+  opacity:0;pointer-events:none;
+}
+#concept-canvas > .c-rail-cluster.in-view{opacity:1;pointer-events:auto;}
+
+/* transparent, not multiply-over-white: this box sits inside a fixed-position
+   ancestor (.c-rail-cluster), which always establishes its own stacking
+   context, so mix-blend-mode here has nothing behind it to blend with and
+   would just paint the white background solid instead of hiding it */
+.c-rail-main{position:absolute;right:0;bottom:0;width:11.86vw;height:17.79vw;z-index:2;cursor:pointer;}
+.c-rail-main img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:bottom center;display:none;pointer-events:none;}
+.c-rail-main img.on{display:block;}
+
+.c-rail-hidden{
+  position:fixed;left:0;right:0;bottom:0;width:100vw;
+  height:calc(17.79vw * 3 + 3.47vw * 2 + 24px + 24px);
+  background:rgba(255,255,255,.85);
+  opacity:0;pointer-events:none;transition:opacity .3s ease;
+  z-index:1;
+}
+.c-rail-cluster:hover .c-rail-hidden{opacity:1;}
+
+.rail-thumb{position:absolute;width:11.86vw;height:17.79vw;object-fit:contain;object-position:bottom center;right:.75vw;pointer-events:auto;mix-blend-mode:multiply;}
+.rt-1{right:calc(.75vw + 12.53vw);bottom:calc(24px + 2 * (17.79vw + 3.47vw));}
+.rt-2{right:calc(.75vw + 12.53vw);bottom:calc(24px + 1 * (17.79vw + 3.47vw));}
+.rt-3{right:calc(.75vw + 12.53vw);bottom:24px;}
+.rt-4{right:.75vw;bottom:calc(24px + 2 * (17.79vw + 3.47vw));}
+.rt-5{right:.75vw;bottom:calc(24px + 1 * (17.79vw + 3.47vw));}
+
+@media (max-width:700px){
+  .c-rail-cluster{display:none;}
+  #concept-text{left:6%;width:88%;text-align:left;}
+}
+
+/* ── mobile layout (<=700px): header, hero screens, and a stacked
+   single-column version of each look, replacing the desktop's wide
+   proportional canvas — see the .cm-block markup added after each look's
+   desktop canvas in index.html ── */
+.cm-block{display:none;}
+
+@media (max-width:700px){
+  /* several mobile elements intentionally bleed past the viewport edge]
+     (see .cm-peek, .cm-hero) — clip that overflow instead of letting it
+     create a horizontal scrollbar */
+  body{overflow-x:hidden;}
+
+  #header{padding:12px;font-size:10px;}
+  #header .nav-left{display:none;}
+
+  /* the desktop's 3em letter-spacing is tuned for wide screens; at mobile
+     widths it overflows the viewport and clips the text */
+  .caption .line2{letter-spacing:.4em;}
+
+  #grid-wrap{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,1fr);}
+
+  #concept-canvas,.concept-canvas,.sticky-scrub-zone,.look-nav{display:none;}
+
+  .cm-block{display:block;position:relative;width:100%;height:592vw;overflow:visible;}
+  /* look 1 has no bottom detail-closeup shot yet (asset not ready, same gap
+     as its desktop timer-photo placeholder) — its content ends earlier than
+     the full reference height, so it doesn't need the full-height tail */
+  .cm-block[data-look="1"]{height:430vw;}
+  .cm-peek{
+    position:absolute;left:57.5vw;top:-9.25vw;width:57vw;height:52vw;
+    object-fit:contain;transform:scaleX(-1);z-index:1;
+  }
+  .cm-turn{
+    position:absolute;left:calc(50% + 2.875vw);top:16.75vw;
+    width:107.75vw;height:161.75vw;transform:translateX(-50%);
+    z-index:2;cursor:grab;touch-action:none;overflow:hidden;
+  }
+  .cm-turn.active{cursor:grabbing;}
+  .cm-turn img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:bottom center;display:none;pointer-events:none;}
+  .cm-turn img.on{display:block;}
+  .cm-label{
+    position:absolute;top:175.5vw;left:50%;transform:translateX(-50%);
+    font-family:'HN',sans-serif;font-size:13px;font-weight:700;
+    letter-spacing:-.01em;text-transform:uppercase;color:#000;z-index:3;
+  }
+  .cm-text{
+    position:absolute;left:3.75vw;top:178.25vw;width:92.5vw;
+    font-size:13px;font-weight:500;letter-spacing:-.01em;
+    text-align:justify;color:#000;z-index:3;
+  }
+  .cm-hero{position:absolute;left:-69.75vw;top:181.25vw;width:180.25vw;height:270.25vw;object-fit:cover;z-index:1;}
+  .cm-side{position:absolute;width:38.75vw;height:58.25vw;object-fit:cover;}
+  .cm-side-a{left:68vw;top:258.25vw;z-index:2;}
+  .cm-side-b{left:54vw;top:248.5vw;z-index:3;}
+  .cm-detail{position:absolute;left:62vw;top:358.5vw;width:39.5vw;height:59.5vw;object-fit:cover;z-index:2;}
+}

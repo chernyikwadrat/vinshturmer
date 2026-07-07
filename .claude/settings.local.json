@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk '{ print length, NR }' bg_animation_3.html)",
+      "Bash(awk '{ if \\(length\\($0\\) > 500\\) print NR\": [LONG LINE, \"length\\($0\\)\" chars] \"substr\\($0,1,120\\)\"...\"; else print NR\": \"$0 }' bg_animation_3.html)",
+      "Bash(awk 'NR==100{print substr\\($0, length\\($0\\)-200\\)}' bg_animation_3.html)",
+      "Bash(awk 'NR==101{print substr\\($0, length\\($0\\)-200\\)}' bg_animation_3.html)",
+      "Bash(python3 -)",
+      "Read(//tmp/**)",
+      "Bash(awk 'NR>=10 && NR<=95 { if \\(length\\($0\\)>500\\) print NR\": [LONG]\"; else print NR\": \"$0 }' bg_animation_3.html)",
+      "Read(//Applications/**)",
+      "Bash(mkdir -p /private/tmp/claude-501/-Users-malevichnastya-project-x/3de187f4-5aa9-47ef-843d-85b9c45ea602/scratchpad)",
+      "Read(//Applications/Google Chrome.app/Contents/MacOS/**)",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless --disable-gpu --screenshot=/private/tmp/claude-501/-Users-malevichnastya-project-x/3de187f4-5aa9-47ef-843d-85b9c45ea602/scratchpad/screenshot.png --window-size=1400,900 --virtual-time-budget=3000 file:///Users/malevichnastya/project_x/bg_animation_3.html)",
+      "Bash(\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --version)",
+      "Bash(\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --headless --disable-gpu --dump-dom \"file:///Users/malevichnastya/project_x/bg_animation_3.html\")",
+      "Bash(awk '{ if \\(length\\($0\\) > 500\\) print NR\": [LONG \"length\\($0\\)\"] \"substr\\($0,1,90\\); else print NR\": \"$0 }' bg_animation_3.html)",
+      "Bash(file /Users/malevichnastya/project_x/assets/fonts/*.otf)",
+      "Bash(pip3 list *)",
+      "Bash(python3 -c \"import numpy\")",
+      "Bash(pip3 install *)",
+      "Bash(python3 -c \"from PIL import Image; print\\('ok'\\)\")",
+      "Bash(sips -c 400 400 /private/tmp/claude-501/-Users-malevichnastya-project-x/3de187f4-5aa9-47ef-843d-85b9c45ea602/scratchpad/fix_check.png --out /private/tmp/claude-501/-Users-malevichnastya-project-x/3de187f4-5aa9-47ef-843d-85b9c45ea602/scratchpad/fix_check_bottom_crop.png)"
+    ]
+  }
+}
