@@ -53,24 +53,61 @@ const FRAME_FIX = [
 // background-filled frames (the backdrop is baked into the same image as
 // the figure, a different export of the same shoot with its own crop
 // drift — measured here via a luminance mask since there's no alpha
-// channel). Unlike FRAME_FIX, the correction here is deliberately zoomed
-// in beyond what any single frame needs (the scale values are all >1,
-// baking in a fixed "overscan" margin) so that after the correction is
-// applied, the frame always fully covers its container — the container
-// clips (overflow:hidden) whatever now-cropped edge sticks out, rather
-// than ever leaving a gap that would show the container's own background
-// and shift frame to frame. translateY anchors the head's own vertical
-// position (like translateX does horizontally) rather than pinning the
-// feet to the bottom edge — pinning the feet used up the entire overscan
-// margin just to cover the bottom, which pushed the head itself above the
-// visible top of the box on the frames that needed real zoom, cropping it
-// clean off. Reusing FRAME_FIX's own values here instead left a visible
+// channel). Per-frame [scale, translateY%, translateX%] — same shape as
+// FRAME_FIX, uniform scale (a non-uniform scaleX/scaleY variant tried here
+// briefly fixed the crop but visibly stretched the figure).
+//
+// scale sits inside the valid window for the whole figure (head to feet)
+// to fit inside the box — the figure fills ~87-91% of the frame's own
+// height, so there's only ~9-13% of vertical slack to split between "not
+// zoomed in enough to cover a gap" and "zoomed in so much the head or
+// feet run past the edge and get clipped." An earlier version picked
+// scale via a multiplicative safety margin on the *upper* end of that
+// window, which nudged a couple of frames just past the limit and
+// clipped the head by a few px; this one is chosen partway between the
+// window's lower and upper bound instead, which also crops in tighter
+// (less empty floor below the feet) as a side effect. translateY is
+// solved to keep the figure inside that window (not tied purely to the
+// head position — that ran out of slack and pushed the feet out; pinning
+// the feet instead pushed the head out, the same problem in reverse).
+// translateX follows the head position like FRAME_FIX, but clamped to
+// whatever margin this (deliberately modest) scale leaves on the sides —
+// giving it more room, like FRAME_FIX_FILL used to, meant a much bigger
+// zoom just to cover the worst-case frame, which is what stretched
+// unevenly once scaleX/scaleY were split apart to fix the crop. Clamping
+// instead means the outlier frames (e.g. look 1's near-profile views)
+// keep a little residual side-to-side drift rather than perfect
+// stability, cropped in at the sides instead of distorted or cropped
+// top/bottom. Reusing FRAME_FIX's own values here instead left a visible
 // size "pulse" between front/back and profile frames — this crop drifts
 // differently from the no-bg export.
 const FRAME_FIX_FILL = {
-  0: [[1.2338,7.278,1.497],[1.2413,7.699,8.023],[1.2264,8.991,5.197],[1.2061,7.869,3.235],[1.2406,7.137,-6.305],[1.2099,7.335,-3.57],[1.2191,8.053,-10.392],[1.2318,7.762,-6.152]],
-  4: [[1.1526,4.901,0.064],[1.1539,7.516,-0.459],[1.1558,6.055,4.152],[1.1539,6.248,3.646],[1.1629,2.137,0.681],[1.1507,3.863,3.984],[1.1552,6.032,-4.867],[1.1571,4.934,4.181]],
-  5: [[1.1407,4.606,0.062],[1.1345,3.397,6.229],[1.1339,2.292,1.771],[1.1364,3.998,-0.868],[1.1632,3.286,-6.094],[1.1401,5.623,-1.044],[1.1509,5.388,-2.647],[1.149,4.501,-3.548]],
+  0: [[1.0924,-3.448,0.592],[1.0991,-3.665,4.953],[1.0859,-2.916,3.867],[1.0679,-3.289,2.13],[1.0985,-3.26,-4.923],[1.0713,-3.513,-3.565],[1.0794,-3.919,-3.971],[1.0906,-3.414,-4.532]],
+  4: [[1.0952,-1.764,0.04],[1.0964,0.106,-0.457],[1.0982,-1.64,3.925],[1.0964,-1.072,3.443],[1.105,-4.224,0.627],[1.0934,-3.173,3.765],[1.0976,-1.665,-4.646],[1.0994,-2.181,3.951]],
+  5: [[1.0939,-1.489,0.042],[1.0879,-3.065,4.393],[1.0873,-4.151,1.68],[1.0897,-2.354,-0.85],[1.1154,-2.395,-5.772],[1.0933,-1.033,-1.019],[1.1036,-1.625,-2.557],[1.1018,-1.754,-3.421]],
+};
+
+// Looks 2, 3 & 4 got a newer 2x-resolution no-bg re-export (${look}-${frame}.avif,
+// e.g. 2-1.avif — not to be confused with the N-photo-M.avif scrub-photo
+// sequence) for just the concept-page drag turntable, replacing the same
+// low-res frames (look-N-frame-M.avif) that the hero/gallery/rail
+// thumbnail keep using elsewhere. It's a different crop from that low-res
+// set (more headroom above the head) and has noticeably more frame-to-
+// frame repositioning, so it needs its own measured correction rather
+// than reusing FRAME_FIX[1..3] — same head-anchored/safe-window method as
+// FRAME_FIX_FILL (scale picked inside the window that keeps the whole
+// figure in frame, translateY solved to stay in that window, translateX
+// clamped to the margin it leaves), since this crop only has ~15-20%
+// vertical slack rather than FRAME_FIX's generous ~40%+, and its own
+// translateX swings (real repositioning between shots, as with the -fill
+// frames) are too large to fit inside that slack uncapped. Desktop-only
+// concept-turn-2/3/4 have overflow:hidden added to match, so the
+// necessarily-oversized frame crops at the edges instead of spilling
+// past the container.
+const FRAME_FIX_HIRES = {
+  2: [[1.1968,-0.956,1.223],[1.1647,-2.662,-2.476],[1.1836,-1.32,3.199],[1.1775,-1.859,-1.615],[1.211,-4.28,-10.548],[1.224,-2.953,-6.857],[1.2441,-3.52,-3.298],[1.2426,-1.089,-4.723]],
+  3: [[1.1961,0.125,0.579],[1.185,-0.916,7.964],[1.1898,-0.369,5.037],[1.2017,-1.283,1.906],[1.2131,-1.119,-5.004],[1.2081,-0.081,-10.404],[1.211,-1.205,4.014],[1.1802,-0.653,0.027]],
+  4: [[1.1674,1.32,0.03],[1.166,1.606,6.096],[1.2128,0.02,-4.253],[1.2241,-0.328,0.239],[1.1292,1.482,1.885],[1.1483,0.323,2.749],[1.1429,-1.511,-2.189],[1.1503,0.123,0.9]],
 };
 
 // ── build background images ──
@@ -153,8 +190,15 @@ let dragLi = null;
 let dragStartX = 0;
 let dragStartFrame = 0;
 
+// drag-to-rotate on the gallery grid (first screen) is desktop-only — on
+// mobile the tiles just sit on their first frame, and touch-action:auto
+// (see the max-width:700px rule in style.css) leaves the page to scroll
+// normally instead of capturing the gesture as a rotate.
+const isMobileWidth = () => window.matchMedia('(max-width:700px)').matches;
+
 gridItems.forEach((item, li) => {
   item.addEventListener('pointerdown', e => {
+    if (isMobileWidth()) return;
     dragLi = li;
     dragStartX = e.clientX;
     dragStartFrame = tileFrames[li];
@@ -306,11 +350,11 @@ if (revealToggleInput) {
 // crops ──
 const collageImgs = [...document.querySelectorAll('.c-collage-img:not(.c-col)')];
 const COLLAGE_DELAYS = [
-  300, 450, 150, 50,      // look 1: cm1-4
-  300, 450,               // look 2: m2, m3
-  300, 450, 500,          // look 3: m1, m2, m3
+  0, 450, 150, 50,      // look 1: cm1-4
+  200, 350,               // look 2: m2, m3
+  300, 450, 400,          // look 3: m1, m2, m3
   300, 450, 500, 550, 600, // look 4: m1-5
-  300, 450, 500, 550,     // look 5: m1-4
+  300, 350, 400, 450,     // look 5: m1-4
   300, 450, 500, 550, 600, // look 6: m1-5
 ];
 
@@ -377,6 +421,34 @@ buildPhotoLoop('concept-photo-3', [
 buildPhotoLoop('concept-photo-6', [
   'assets/images/6-photo-1-src.jpg',
   'assets/images/6-photo-2.jpg',
+], 500);
+
+// about section: 5 urban-texture reference photos, each cycling through its
+// own 3 shots — same timer-driven crossfade as the per-look photo loops above
+buildPhotoLoop('about-photo-1', [
+  'assets/images/concept-1-1.avif',
+  'assets/images/concept-1-1-1.avif',
+  'assets/images/concept-1-3.avif',
+], 500);
+buildPhotoLoop('about-photo-2', [
+  'assets/images/concept-2-1.avif',
+  'assets/images/concept-2-2.avif',
+  'assets/images/concept-2-3.avif',
+], 500);
+buildPhotoLoop('about-photo-3', [
+  'assets/images/concept-3-1.avif',
+  'assets/images/concept-3-2.avif',
+  'assets/images/concept-3-3.avif',
+], 500);
+buildPhotoLoop('about-photo-4', [
+  'assets/images/concept-4-1.avif',
+  'assets/images/concept-4-2.avif',
+  'assets/images/concept-4-3.avif',
+], 500);
+buildPhotoLoop('about-photo-5', [
+  'assets/images/concept-5-1.avif',
+  'assets/images/concept-5-2.avif',
+  'assets/images/concept-5-3.avif',
 ], 500);
 
 // look 4 & 5: only one real photo exists for each — mirror it for the second
@@ -469,26 +541,26 @@ updateScrubZoneOffsets();
 window.addEventListener('resize', updateScrubZoneOffsets);
 updateScrubFrames();
 
-// ── concept page: fixed look-rail + look-nav only show once the concept section is reached ──
+// ── concept page: fixed look-rail + look-nav only show once the user has
+// scrolled a bit into the concept section (scroll-progress driven, not a timer) ──
 const conceptSection = document.getElementById('concept');
 const railCluster = document.querySelector('.c-rail-cluster');
 const lookNav = document.querySelector('.look-nav');
 if (conceptSection && (railCluster || lookNav)) {
-  let railTimer = null;
-  new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      clearTimeout(railTimer);
-      if (entry.isIntersecting) {
-        railTimer = setTimeout(() => {
-          if (railCluster) railCluster.classList.add('in-view');
-          if (lookNav) lookNav.classList.add('in-view');
-        }, 700);
-      } else {
-        if (railCluster) railCluster.classList.remove('in-view');
-        if (lookNav) lookNav.classList.remove('in-view');
-      }
-    });
-  }, { threshold: 0 }).observe(conceptSection);
+  const REVEAL_OFFSET_VH = 0.03; // how far past the section's top edge (in viewport heights) before revealing
+  function updateRailVisibility() {
+    const rect = conceptSection.getBoundingClientRect();
+    // rect.bottom > 1 (not > 0): when a section with no scroll room of its
+    // own (e.g. #contact, exactly one viewport tall) immediately follows
+    // #concept, the document's max scroll position lands with #concept's
+    // bottom edge sitting a sub-pixel above 0 permanently — >0 alone would
+    // never clear, leaving the rail/nav stuck on for that entire section.
+    const scrolledIn = rect.top <= -window.innerHeight * REVEAL_OFFSET_VH && rect.bottom > 1;
+    if (railCluster) railCluster.classList.toggle('in-view', scrolledIn);
+    if (lookNav) lookNav.classList.toggle('in-view', scrolledIn);
+  }
+  window.addEventListener('scroll', updateRailVisibility, { passive: true });
+  updateRailVisibility();
 }
 
 // ── concept page: active-look thumbnail auto-turns, freezes on frame 1 while hovered,
@@ -640,16 +712,30 @@ function buildDragTurntable(elId, frameSources, frameFix) {
 // The container clips (overflow:hidden) so the correction's built-in
 // overscan crops the backdrop at the edges instead of ever showing a gap.
 const FILL_FRAMES = (li) => Array.from({length: 8}, (_, i) => `assets/images/${li + 1}-${i + 1}-fill.avif`);
+// looks 2/3/4 desktop concept-turn only — see FRAME_FIX_HIRES's comment
+const HIRES_FRAMES = (look) => Array.from({length: 8}, (_, i) => `assets/images/${look}-${i + 1}.avif`);
 
 buildDragTurntable('concept-turn', FILL_FRAMES(0), FRAME_FIX_FILL[0]);
 // look 1 mobile: same frames, independent turntable instance for the stacked mobile layout
 buildDragTurntable('concept-turn-mobile-1', FILL_FRAMES(0), FRAME_FIX_FILL[0]);
-// looks 2, 3 & 4 only ever had no-bg cutout frames — use the matching FRAME_FIX correction
-buildDragTurntable('concept-turn-2', NOBG[1], FRAME_FIX[1]);
-buildDragTurntable('concept-turn-3', NOBG[2], FRAME_FIX[2]);
-buildDragTurntable('concept-turn-4', NOBG[3], FRAME_FIX[3]);
+// looks 2, 3 & 4: desktop-only 2x-resolution re-export (HIRES_FRAMES/
+// FRAME_FIX_HIRES below), just for this one drag turntable per look — the
+// hero/gallery/rail thumbnail keep using the lower-res NOBG set, since
+// they're much smaller on screen and this crop-page turntable is the one
+// place the extra detail is actually visible.
+buildDragTurntable('concept-turn-2', HIRES_FRAMES(2), FRAME_FIX_HIRES[2]);
+buildDragTurntable('concept-turn-3', HIRES_FRAMES(3), FRAME_FIX_HIRES[3]);
+buildDragTurntable('concept-turn-4', HIRES_FRAMES(4), FRAME_FIX_HIRES[4]);
 buildDragTurntable('concept-turn-5', FILL_FRAMES(4), FRAME_FIX_FILL[4]);
 buildDragTurntable('concept-turn-6', FILL_FRAMES(5), FRAME_FIX_FILL[5]);
+// looks 2-6 mobile: same frames as each look's desktop turntable above,
+// independent instances for the stacked mobile layout — by analogy with
+// concept-turn-mobile-1
+buildDragTurntable('concept-turn-mobile-2', HIRES_FRAMES(2), FRAME_FIX_HIRES[2]);
+buildDragTurntable('concept-turn-mobile-3', HIRES_FRAMES(3), FRAME_FIX_HIRES[3]);
+buildDragTurntable('concept-turn-mobile-4', HIRES_FRAMES(4), FRAME_FIX_HIRES[4]);
+buildDragTurntable('concept-turn-mobile-5', FILL_FRAMES(4), FRAME_FIX_FILL[4]);
+buildDragTurntable('concept-turn-mobile-6', FILL_FRAMES(5), FRAME_FIX_FILL[5]);
 
 // ── init ──
 showLook(0, 0);
