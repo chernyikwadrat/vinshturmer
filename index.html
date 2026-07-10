@@ -8,9 +8,6 @@
 </head>
 <body>
 
-<!-- dev-only: toggle the scroll-reveal animation on/off for testing -->
-<label id="reveal-toggle"><input type="checkbox" id="reveal-toggle-input" checked> reveal anim</label>
-
 <!-- fixed look nav, vertically centered, shown while scrolling through concept -->
 <div class="look-nav">
   <span class="look-nav-item" data-look="1">Look 1</span>
@@ -101,14 +98,16 @@
   <!-- mobile-only stacked layout for look 1 (desktop canvas above is hidden
        under the mobile breakpoint); see .cm-block rules in style.css -->
   <div class="cm-block" data-look="1">
-    <img class="cm-peek" src="assets/images/1-col-1.avif" alt="">
     <div id="concept-turn-mobile-1" class="cm-turn"></div>
     <p class="cm-label">Look 1</p>
     <p class="cm-text">The first look explores fragmentation through asymmetry, layering, and contrasting knitted textures. The interaction between soft crochet, transparent mesh, and distorted proportions reflects the uneven and constantly shifting surfaces of the urban environment.</p>
-    <img class="cm-hero" src="assets/images/1-m-1.avif" alt="">
-    <img class="cm-side cm-side-a" src="assets/images/1-m-2.avif" alt="">
-    <img class="cm-side cm-side-b" src="assets/images/1-m-3.avif" alt="">
-    <img class="cm-detail" src="assets/images/1-m-4.avif" alt="">
+    <div class="cm-gallery">
+      <img class="cm-full" src="assets/images/1-col-1.avif" alt="">
+      <img class="cm-full" src="assets/images/1-m-1.avif" alt="">
+      <img src="assets/images/1-m-2.avif" alt="">
+      <img src="assets/images/1-m-3.avif" alt="">
+      <img class="cm-full" src="assets/images/1-m-4.avif" alt="">
+    </div>
   </div>
 
   <div id="concept-canvas-2" class="concept-canvas">
@@ -132,16 +131,17 @@
 
   <!-- mobile-only stacked layout for look 2, by analogy with look 1's
        .cm-block above — this look only has 4 source images (xl + 2 m-shots
-       + col), one short of the full 5-slot pattern, so cm-detail is
-       omitted and the block runs shorter (see .cm-block[data-look="2"]) -->
+       + col), one short of the full set, so there's no second cm-full shot -->
   <div class="cm-block" data-look="2">
-    <img class="cm-peek" src="assets/images/2-col-1.avif" alt="">
     <div id="concept-turn-mobile-2" class="cm-turn"></div>
     <p class="cm-label">Look 2</p>
     <p class="cm-text">The second look focuses on tension, distortion, and the relationship between the body and material. Stretched tights form a fragile surface around the silhouette, reflecting both physical pressure and the instability associated with a constantly transforming urban space.</p>
-    <img class="cm-hero" src="assets/images/2-xl.avif" alt="">
-    <img class="cm-side cm-side-a" src="assets/images/2-m-2.avif" alt="">
-    <img class="cm-side cm-side-b" src="assets/images/2-m-3.avif" alt="">
+    <div class="cm-gallery">
+      <img class="cm-full" src="assets/images/2-col-1.avif" alt="">
+      <img class="cm-full" src="assets/images/2-xl.avif" alt="">
+      <img src="assets/images/2-m-2.avif" alt="">
+      <img src="assets/images/2-m-3.avif" alt="">
+    </div>
   </div>
 
   <div id="concept-canvas-3" class="concept-canvas">
@@ -167,14 +167,16 @@
   <!-- mobile-only stacked layout for look 3, by analogy with look 1's
        .cm-block above -->
   <div class="cm-block" data-look="3">
-    <img class="cm-peek" src="assets/images/3-col-1.avif" alt="">
     <div id="concept-turn-mobile-3" class="cm-turn"></div>
     <p class="cm-label">Look 3</p>
     <p class="cm-text">The third look explores reconstruction through layered garments and displaced elements of classical clothing. The combination of tailoring, transparent surfaces, and fragmented construction reflects the city as a structure continuously dismantled and reassembled.</p>
-    <img class="cm-hero" src="assets/images/3-xl.avif" alt="">
-    <img class="cm-side cm-side-a" src="assets/images/3-m-1.avif" alt="">
-    <img class="cm-side cm-side-b" src="assets/images/3-m-2.avif" alt="">
-    <img class="cm-detail" src="assets/images/3-m-3.avif" alt="">
+    <div class="cm-gallery">
+      <img class="cm-full" src="assets/images/3-col-1.avif" alt="">
+      <img class="cm-full" src="assets/images/3-xl.avif" alt="">
+      <img src="assets/images/3-m-1.avif" alt="">
+      <img src="assets/images/3-m-2.avif" alt="">
+      <img class="cm-full" src="assets/images/3-m-3.avif" alt="">
+    </div>
   </div>
 
   <div id="concept-canvas-4" class="concept-canvas">
@@ -202,14 +204,16 @@
        the 5-slot mobile pattern fits, so this picks the same representative
        subset (col1, m1-m4) rather than cramming all 7 in -->
   <div class="cm-block" data-look="4">
-    <img class="cm-peek" src="assets/images/4-col-1.avif" alt="">
     <div id="concept-turn-mobile-4" class="cm-turn"></div>
     <p class="cm-label">Look 4</p>
     <p class="cm-text">The fourth look translates urban fragmentation into knitted and pleated structures. Exposed seams, separate knitted sections, and the architectural rhythm of pleating create a silhouette that appears simultaneously constructed, unfinished, and in a state of transformation.</p>
-    <img class="cm-hero" src="assets/images/4-m-1.avif" alt="">
-    <img class="cm-side cm-side-a" src="assets/images/4-m-2.avif" alt="">
-    <img class="cm-side cm-side-b" src="assets/images/4-m-3.avif" alt="">
-    <img class="cm-detail" src="assets/images/4-m-4.avif" alt="">
+    <div class="cm-gallery">
+      <img class="cm-full" src="assets/images/4-col-1.avif" alt="">
+      <img class="cm-full" src="assets/images/4-m-1.avif" alt="">
+      <img src="assets/images/4-m-2.avif" alt="">
+      <img src="assets/images/4-m-3.avif" alt="">
+      <img class="cm-full" src="assets/images/4-m-4.avif" alt="">
+    </div>
   </div>
 
   <div id="concept-canvas-5" class="concept-canvas">
@@ -234,14 +238,16 @@
   <!-- mobile-only stacked layout for look 5, by analogy with look 1's
        .cm-block above — desktop has 2 col graphics, picks col1 for the peek -->
   <div class="cm-block" data-look="5">
-    <img class="cm-peek" src="assets/images/5-col-1.avif" alt="">
     <div id="concept-turn-mobile-5" class="cm-turn"></div>
     <p class="cm-label">Look 5</p>
     <p class="cm-text">The fifth look combines metallic surfaces with controlled deformation and a simplified elongated silhouette. The contrast between the silver knitted dress and the black outer layer refers to industrial materials, compressed structures, and the changing physical surfaces of the city.</p>
-    <img class="cm-hero" src="assets/images/5-m-1.avif" alt="">
-    <img class="cm-side cm-side-a" src="assets/images/5-m-2.avif" alt="">
-    <img class="cm-side cm-side-b" src="assets/images/5-m-3.avif" alt="">
-    <img class="cm-detail" src="assets/images/5-8.avif" alt="">
+    <div class="cm-gallery">
+      <img class="cm-full" src="assets/images/5-col-1.avif" alt="">
+      <img class="cm-full" src="assets/images/5-m-1.avif" alt="">
+      <img src="assets/images/5-m-2.avif" alt="">
+      <img src="assets/images/5-m-3.avif" alt="">
+      <img class="cm-full" src="assets/images/5-8.avif" alt="">
+    </div>
   </div>
 
   <div id="concept-canvas-6" class="concept-canvas">
@@ -269,14 +275,16 @@
        .cm-block above — desktop has 5 m-shots in a row, picks the same
        representative subset (m1-m4) as the other over-full looks -->
   <div class="cm-block" data-look="6">
-    <img class="cm-peek" src="assets/images/6-col-1.avif" alt="">
     <div id="concept-turn-mobile-6" class="cm-turn"></div>
     <p class="cm-label">Look 6</p>
     <p class="cm-text">The final look explores urban texture through draping, irregular volume, and the natural deformation of fabric. Its fragmented folds and unfinished visual rhythm reflect the city as a tactile landscape shaped by continuous processes of decay, reconstruction, and renewal.</p>
-    <img class="cm-hero" src="assets/images/6-m-1.avif" alt="">
-    <img class="cm-side cm-side-a" src="assets/images/6-m-2.avif" alt="">
-    <img class="cm-side cm-side-b" src="assets/images/6-m-3.avif" alt="">
-    <img class="cm-detail" src="assets/images/6-m-4.avif" alt="">
+    <div class="cm-gallery">
+      <img class="cm-full" src="assets/images/6-col-1.avif" alt="">
+      <img class="cm-full" src="assets/images/6-m-1.avif" alt="">
+      <img src="assets/images/6-m-2.avif" alt="">
+      <img src="assets/images/6-m-3.avif" alt="">
+      <img class="cm-full" src="assets/images/6-m-4.avif" alt="">
+    </div>
   </div>
 </section>
 

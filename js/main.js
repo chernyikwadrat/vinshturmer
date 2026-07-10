@@ -192,9 +192,9 @@ let dragStartFrame = 0;
 
 // drag-to-rotate on the gallery grid (first screen) is desktop-only — on
 // mobile the tiles just sit on their first frame, and touch-action:auto
-// (see the max-width:700px rule in style.css) leaves the page to scroll
+// (see the max-width:1024px rule in style.css) leaves the page to scroll
 // normally instead of capturing the gesture as a rotate.
-const isMobileWidth = () => window.matchMedia('(max-width:700px)').matches;
+const isMobileWidth = () => window.matchMedia('(max-width:1024px)').matches;
 
 gridItems.forEach((item, li) => {
   item.addEventListener('pointerdown', e => {
@@ -335,14 +335,6 @@ document.querySelectorAll('input[name="scroll-mode"]').forEach(radio => {
     if (radio.value === 'scrub') { updateScrubZoneOffsets(); updateScrubFrames(); }
   });
 });
-
-// ── dev-only: toggle the scroll-reveal animation on/off for testing ──
-const revealToggleInput = document.getElementById('reveal-toggle-input');
-if (revealToggleInput) {
-  revealToggleInput.addEventListener('change', () => {
-    document.body.classList.toggle('reveal-off', !revealToggleInput.checked);
-  });
-}
 
 // ── concept page: collage photos pop in on scroll, once each, only while
 // scrolling down. The col-* clusters are excluded — those are always
@@ -598,12 +590,14 @@ if (railCluster && railMain) {
       return img;
     });
     startActivePlay();
+    railMain.dataset.look = lookN;
 
     const others = [1, 2, 3, 4, 5, 6].filter(n => n !== lookN);
     others.forEach((look, i) => {
       if (!railThumbs[i]) return;
       railThumbs[i].src = `assets/images/look-${look}-frame-1.avif`;
       railThumbs[i].alt = `Look ${look}`;
+      railThumbs[i].dataset.look = look;
     });
 
     if (lookNav) {
@@ -651,6 +645,16 @@ if (railCluster && railMain) {
         recomputeActiveLook();
       });
     }, { threshold: [0, 0.1, 0.25, 0.5, 0.75, 1] }).observe(el);
+  });
+
+  // rail cluster doubles as look navigation: clicking the active thumbnail
+  // or any of the 5 revealed on hover jumps to that look's own canvas
+  const lookCanvasByN = new Map(lookCanvases);
+  railCluster.addEventListener('click', e => {
+    const target = e.target.closest('[data-look]');
+    if (!target) return;
+    const el = lookCanvasByN.get(Number(target.dataset.look));
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
   setActiveLook(currentActiveLook);
@@ -716,8 +720,6 @@ const FILL_FRAMES = (li) => Array.from({length: 8}, (_, i) => `assets/images/${l
 const HIRES_FRAMES = (look) => Array.from({length: 8}, (_, i) => `assets/images/${look}-${i + 1}.avif`);
 
 buildDragTurntable('concept-turn', FILL_FRAMES(0), FRAME_FIX_FILL[0]);
-// look 1 mobile: same frames, independent turntable instance for the stacked mobile layout
-buildDragTurntable('concept-turn-mobile-1', FILL_FRAMES(0), FRAME_FIX_FILL[0]);
 // looks 2, 3 & 4: desktop-only 2x-resolution re-export (HIRES_FRAMES/
 // FRAME_FIX_HIRES below), just for this one drag turntable per look — the
 // hero/gallery/rail thumbnail keep using the lower-res NOBG set, since
@@ -728,14 +730,13 @@ buildDragTurntable('concept-turn-3', HIRES_FRAMES(3), FRAME_FIX_HIRES[3]);
 buildDragTurntable('concept-turn-4', HIRES_FRAMES(4), FRAME_FIX_HIRES[4]);
 buildDragTurntable('concept-turn-5', FILL_FRAMES(4), FRAME_FIX_FILL[4]);
 buildDragTurntable('concept-turn-6', FILL_FRAMES(5), FRAME_FIX_FILL[5]);
-// looks 2-6 mobile: same frames as each look's desktop turntable above,
-// independent instances for the stacked mobile layout — by analogy with
-// concept-turn-mobile-1
-buildDragTurntable('concept-turn-mobile-2', HIRES_FRAMES(2), FRAME_FIX_HIRES[2]);
-buildDragTurntable('concept-turn-mobile-3', HIRES_FRAMES(3), FRAME_FIX_HIRES[3]);
-buildDragTurntable('concept-turn-mobile-4', HIRES_FRAMES(4), FRAME_FIX_HIRES[4]);
-buildDragTurntable('concept-turn-mobile-5', FILL_FRAMES(4), FRAME_FIX_FILL[4]);
-buildDragTurntable('concept-turn-mobile-6', FILL_FRAMES(5), FRAME_FIX_FILL[5]);
+// mobile look turntables: the no-bg NOBG/FRAME_FIX set (same as the hero
+// figure and gallery grid) instead of each look's -fill/hires desktop
+// frames — mobile shows the model floating on the page's own white
+// background rather than the baked-in backdrop.
+for (let look = 1; look <= NL; look++) {
+  buildDragTurntable(`concept-turn-mobile-${look}`, NOBG[look - 1], FRAME_FIX[look - 1]);
+}
 
 // ── init ──
 showLook(0, 0);

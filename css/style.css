@@ -2,7 +2,7 @@
 @font-face{font-family:'HN';font-weight:500;src:url('../assets/fonts/HN-Medium.otf') format('opentype');}
 
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;background:#fff;overflow-x:hidden;}
+html,body{width:100%;background:#fff;}
 body{font-family:'HN',sans-serif;-webkit-font-smoothing:antialiased;}
 
 /* click-dragging over the hero figure or any of the drag-to-rotate
@@ -41,15 +41,6 @@ body{font-family:'HN',sans-serif;-webkit-font-smoothing:antialiased;}
 /* ── header ── */
 #header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:12px 12px;font-size:13px;font-weight:700;letter-spacing:-.01em;text-transform:uppercase;color:#000;background:#fff;}
 #header.no-bg{background:transparent;}
-
-/* dev-only toggle, top-left, stays clear of the header/rail */
-#reveal-toggle{
-  position:fixed;top:44px;left:8px;z-index:60;
-  background:#fff;border:1px solid #000;border-radius:4px;padding:4px 8px;
-  font-family:sans-serif;font-size:11px;color:#000;
-  display:flex;align-items:center;gap:6px;cursor:pointer;
-}
-body.reveal-off .c-collage-img{opacity:1 !important;}
 
 /* dev-only toggle: pick a scroll transition style for the look blocks */
 #scroll-mode-toggle{
@@ -154,16 +145,23 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
 #about{position:relative;height:100vh;background:#fff;overflow:hidden;}
 
 
+/* font-size uses min(vw, vh*1.6) rather than plain vw: top/left above are
+   %-of-height on this 100vh section, so they already shrink with a shorter
+   window — but plain vw-only text doesn't, so on a short-but-wide window
+   the (relatively too-large) text overruns the now-tighter vertical gap
+   and overlaps the row below. The vh term (1.6 = 1440/900, this section's
+   own reference ratio) makes the font shrink in step with the layout
+   whichever dimension is actually the tighter constraint. */
 .about-heading{
   position:absolute;left:41.67%;top:10%;
-  font-family:'HN',sans-serif;font-weight:700;font-size:clamp(10px,1.08vw,13px);
+  font-family:'HN',sans-serif;font-weight:700;font-size:clamp(10px,min(1.08vw,1.728vh),13px);
   letter-spacing:-.01em;text-transform:uppercase;color:#000;
   white-space:nowrap;
 }
 
 .about-text{
   position:absolute;left:50%;top:11.5%;width:19.33%;
-  font-family:'HN',sans-serif;font-weight:500;font-size:clamp(10px,1.08vw,13px);
+  font-family:'HN',sans-serif;font-weight:500;font-size:clamp(10px,min(1.08vw,1.728vh),13px);
   letter-spacing:-.01em;text-align:justify;color:#000;
 }
 .about-text p{margin-bottom:1.5em;}
@@ -173,7 +171,10 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
   position:absolute;left:1.18%;top:55.11%;width:97.78%;
   display:flex;justify-content:space-between;
 }
-.about-photo{position:relative;width:10.417vw;height:6.944vw;overflow:hidden;}
+/* width/height use min(vw, vh*1.6) like the font-sizes above — a vw-only
+   box doesn't shrink on a short window, so at extreme aspect ratios it
+   stays large while .about-row's top:55.11% keeps rising to meet it */
+.about-photo{position:relative;width:min(10.417vw,16.667vh);height:min(6.944vw,11.11vh);overflow:hidden;}
 .about-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:none;pointer-events:none;}
 .about-photo img.on{display:block;}
 
@@ -183,7 +184,7 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
    hidden on this layout, not a mistake. No repeated mini-header/back
    link here (unlike the Figma frame) since the site already has one
    persistent fixed #header used everywhere, mobile included. */
-@media (max-width:700px){
+@media (max-width:1024px){
   #about{height:auto;padding:20vw 4vw 12vw;overflow:hidden;}
   .about-heading{
     position:static;
@@ -401,7 +402,7 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
 .c6-col{left:0%;top:1%;width:100%;height:50%;object-fit:contain;z-index:1;pointer-events:none;}
 .c6-photo{left:15.97%;top:76.5625%;width:68.06%;height:18.75%;z-index: 6;}
 
-@media (max-width:700px){
+@media (max-width:1024px){
   .concept-text2,.concept-text3,.concept-text4,.concept-text5,.concept-text6{left:6%;width:88%;text-align:left;}
 }
 
@@ -441,21 +442,22 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
 }
 .c-rail-cluster:hover .c-rail-hidden{opacity:1;}
 
-/* pointer-events:none — these are purely decorative (updated only via
-   src/alt in JS, no click handler), and .c-rail-cluster is position:fixed,
-   so its bounding box sits over the bottom-right of the viewport on every
-   screen regardless of scroll position. With pointer-events:auto here,
-   these 5 images stayed hit-testable even while invisible (opacity:0
-   pre-hover), silently eating drag/click gestures meant for whatever's
-   underneath on other screens. */
+/* pointer-events:none by default — these sit inside .c-rail-hidden, which
+   stays in the DOM (just opacity:0) even pre-hover, and .c-rail-cluster is
+   position:fixed over the bottom-right of the viewport on every screen
+   regardless of scroll position. Without this, they'd stay hit-testable
+   while invisible, silently eating drag/click gestures meant for whatever
+   is underneath on other screens. Re-enabled only while the cluster is
+   actually hovered open, so they can act as look navigation then. */
 .rail-thumb{position:absolute;width:11.86vw;height:17.79vw;object-fit:contain;object-position:bottom center;right:.75vw;pointer-events:none;mix-blend-mode:multiply;}
+.c-rail-cluster:hover .rail-thumb{pointer-events:auto;cursor:pointer;}
 .rt-1{right:calc(.75vw + 12.53vw);bottom:calc(24px + 2 * (17.79vw + 3.47vw));}
 .rt-2{right:calc(.75vw + 12.53vw);bottom:calc(24px + 1 * (17.79vw + 3.47vw));}
 .rt-3{right:calc(.75vw + 12.53vw);bottom:24px;}
 .rt-4{right:.75vw;bottom:calc(24px + 2 * (17.79vw + 3.47vw));}
 .rt-5{right:.75vw;bottom:calc(24px + 1 * (17.79vw + 3.47vw));}
 
-@media (max-width:700px){
+@media (max-width:1024px){
   .c-rail-cluster{display:none;}
   #concept-text{left:6%;width:88%;text-align:left;}
 }
@@ -466,10 +468,18 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
    desktop canvas in index.html ── */
 .cm-block{display:none;}
 
-@media (max-width:700px){
+@media (max-width:1024px){
   /* several mobile elements intentionally bleed past the viewport edge
-     (see .cm-peek, .cm-hero) — html,body's own overflow-x:hidden above
-     already clips that instead of letting it create a horizontal scrollbar */
+     (see .cm-peek, .cm-hero) — clip that overflow here instead of letting
+     it create a horizontal scrollbar. Scoped to mobile only, not html,body
+     globally: overflow-x on an axis with no matching overflow-y forces the
+     UA to compute overflow-y as auto (CSS Overflow spec), turning body
+     into its own scroll container — which breaks position:sticky for the
+     desktop-only .sticky-scrub-inner photo-scrub screens, since their
+     sticky containing block stops being the viewport. Mobile never renders
+     that sticky element (.sticky-scrub-zone is display:none there), so the
+     same fixup is harmless here. */
+  html,body{overflow-x:hidden;}
 
   #header{padding:12px;font-size:10px;}
   #header .nav-left{display:none;}
@@ -478,7 +488,21 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
      widths it overflows the viewport and clips the text */
   .caption .line2{letter-spacing:.4em;}
 
-  #grid-wrap{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,1fr);}
+  /* 100dvh instead of the base rule's 100vh: mobile browsers size 100vh
+     against the viewport with the address bar hidden, so on first load
+     (bar visible) the section renders taller than what's actually visible,
+     which is what let the top row's models start getting cut off by the
+     fixed header immediately, before any real scrolling. dvh tracks the
+     actual visible viewport instead. */
+  #gallery{height:100dvh;}
+  #grid-wrap{
+    grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,1fr);
+    /* clears the fixed header so row 1's models don't start out partly
+       behind it, and shrinks all 3 rows a little to leave more breathing
+       room above each model's head */
+    padding-top:44px;
+  }
+  .grid-item img{height:78%;}
   /* drag-to-rotate is desktop-only on the gallery grid (first screen) — see
      the matching mobile guard on the pointerdown handler in main.js.
      touch-action:auto restores normal page scrolling over the tiles instead
@@ -486,41 +510,55 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
   .grid-item{touch-action:auto;cursor:default;}
 
   #concept-canvas,.concept-canvas,.sticky-scrub-zone,.look-nav{display:none;}
+  /* html[data-scroll-mode="scrub"] .sticky-scrub-zone{display:block} (see
+     above) outranks the plain-class rule right above this on specificity —
+     it's set on <html> regardless of viewport width, so without this it
+     wins here too and leaves each zone's 280vh spacer visible, opening a
+     huge gap between every mobile look block */
+  html[data-scroll-mode="scrub"] .sticky-scrub-zone{display:none;}
 
-  /* 430vw fits the full 5-slot pattern (peek/turn/label/text/hero/side-a/
-     side-b/detail) used by looks 1, 3, 4, 5 & 6 */
-  .cm-block{display:block;position:relative;width:100%;height:430vw;overflow:visible;}
-  /* look 2 only has 4 source images (xl + 2 m-shots + col) instead of the
-     full 5, so cm-detail is omitted (see index.html) and the block doesn't
-     need the full-height tail */
-  .cm-block[data-look="2"]{height:330vw;}
-  .cm-peek{
-    position:absolute;left:57.5vw;top:-9.25vw;width:57vw;height:52vw;
-    object-fit:contain;transform:scaleX(-1);z-index:1;
+  /* normal-flow stack instead of the old absolute/vw-coordinate composition
+     — auto-height, no more per-look magic numbers to keep in sync with
+     whichever images a look happens to have */
+  .cm-block{
+    display:flex;flex-direction:column;align-items:center;
+    width:100%;padding:8vw 0 14vw;
   }
+
+  /* first block in each look: draggable no-bg model. Deliberately not
+     100vw — .cm-turn carries touch-action:none so the drag gesture can
+     capture the pointer, and if that zone spanned the full width it would
+     also swallow the vertical swipe someone starts there to scroll the
+     page. The side margins (10vw each) are dead space reserved for that
+     scroll gesture. */
   .cm-turn{
-    position:absolute;left:calc(50% + 2.875vw);top:16.75vw;
-    width:107.75vw;height:161.75vw;transform:translateX(-50%);
-    z-index:2;cursor:grab;touch-action:none;overflow:hidden;
+    position:relative;width:80vw;height:78vh;
+    cursor:grab;touch-action:none;
   }
   .cm-turn.active{cursor:grabbing;}
   .cm-turn img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:bottom center;display:none;pointer-events:none;}
   .cm-turn img.on{display:block;}
+
   .cm-label{
-    position:absolute;top:175.5vw;left:50%;transform:translateX(-50%);
+    margin-top:5vw;
     font-family:'HN',sans-serif;font-size:clamp(10px,.9vw,13px);font-weight:500;
-    letter-spacing:-.01em;text-transform:uppercase;color:#000;z-index:3;
+    letter-spacing:-.01em;text-transform:uppercase;color:#000;
   }
   .cm-text{
-    position:absolute;left:3.75vw;top:178.25vw;width:92.5vw;
+    margin-top:2.5vw;width:92.5vw;
     font-size:13px;font-weight:500;letter-spacing:-.01em;
-    text-align:justify;color:#000;z-index:3;
+    text-align:justify;color:#000;
   }
-  .cm-hero{position:absolute;left:-69.75vw;top:181.25vw;width:180.25vw;height:270.25vw;object-fit:cover;z-index:1;}
-  .cm-side{position:absolute;width:38.75vw;height:58.25vw;object-fit:cover;}
-  .cm-side-a{left:68vw;top:258.25vw;z-index:2;}
-  .cm-side-b{left:54vw;top:248.5vw;z-index:3;}
-  .cm-detail{position:absolute;left:62vw;top:358.5vw;width:39.5vw;height:59.5vw;object-fit:cover;z-index:2;}
+
+  /* supporting stills below the model — full-width shots (.cm-full: the
+     collage/hero/detail pieces) stack on their own row, the two closeup
+     "side" shots share a row */
+  .cm-gallery{
+    margin-top:6vw;width:92.5vw;
+    display:grid;grid-template-columns:1fr 1fr;gap:2vw;
+  }
+  .cm-gallery img{width:100%;height:55vw;object-fit:cover;}
+  .cm-gallery img.cm-full{grid-column:1 / -1;height:100vw;}
 }
 
 /* ── contact / about the designer (1440x900 reference, single viewport) ──
@@ -533,9 +571,12 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
    offset. */
 #contact{position:relative;height:100vh;background:#fff;overflow:hidden;}
 
+/* min(vw, vh*1.6) — see .about-photo's comment; without it this box stays
+   full vw-size on a short window and collides with the bio text above it,
+   which (thanks to the font-size fix) is now correctly shrinking. */
 .contact-photo{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:11.94vw;height:11.94vw;overflow:hidden;
+  width:min(11.94vw,19.104vh);height:min(11.94vw,19.104vh);overflow:hidden;
 }
 .contact-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;}
 
@@ -544,27 +585,32 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
   display:flex;flex-direction:column;align-items:flex-start;
   width:19.33vw; /* 278/1440 — same column width as .about-text */
 }
+/* font-size uses min(vw, vh*1.6) — see the matching comment on .about-heading
+   above. .contact-text only has one %-of-height anchor (its own top:13.56%),
+   but the bio+links flow below it needs to fit before .contact-photo's
+   top:50% center; a vw-only font stays full size on a short window while
+   that gap shrinks, and the two collide. */
 .contact-bio{
   width:100%;
-  font-family:'HN',sans-serif;font-weight:500;font-size:clamp(10px,1.08vw,13px);
+  font-family:'HN',sans-serif;font-weight:500;font-size:clamp(10px,min(1.08vw,1.728vh),13px);
   letter-spacing:-.01em;text-align:justify;color:#000;
 }
 .contact-links{
   width:200%; /* twice the column, matching the Figma frame's own ratio */
   margin-top:-1em;
   display:flex;flex-direction:column;align-items:center;
-  font-family:'HN',sans-serif;font-weight:700;font-size:clamp(10px,1.08vw,13px);
+  font-family:'HN',sans-serif;font-weight:700;font-size:clamp(10px,min(1.08vw,1.728vh),13px);
   letter-spacing:-.01em;text-align:center;text-transform:uppercase;color:#000;
   white-space:nowrap;
 }
 
 .contact-sayhi{
   position:absolute;left:50%;bottom:1.11%;transform:translateX(-50%);
-  font-family:'HN',sans-serif;font-weight:700;font-size:clamp(10px,1.08vw,13px);
+  font-family:'HN',sans-serif;font-weight:700;font-size:clamp(10px,min(1.08vw,1.728vh),13px);
   letter-spacing:-.01em;text-transform:uppercase;color:#000;
 }
 
-@media (max-width:700px){
+@media (max-width:1024px){
   #contact{height:auto;padding:20vw 4vw 12vw;overflow:hidden;}
   .contact-photo{position:static;width:28.13vw;height:28.13vw;transform:none;margin:0 auto 6vw;}
   .contact-text{position:static;width:100%;align-items:center;}
