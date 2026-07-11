@@ -15,6 +15,37 @@ body{font-family:'HN',sans-serif;-webkit-font-smoothing:antialiased;}
   -webkit-user-select:none;user-select:none;
 }
 
+/* ── preloader: full-screen takeover, brand+percent row plus a small
+   crossfading photo dead-center (built from the same #about photo set via
+   buildPhotoLoop in main.js). z-index sits above #header (20) and
+   everything else on the page since it's meant to fully obscure the site
+   until images have loaded. Desktop centers the brand/percent row
+   vertically in the viewport per the Figma frame; mobile pins it to the
+   top instead, matching the real #header's own position. ── */
+#preloader{
+  position:fixed;inset:0;z-index:100;
+  background:#fff;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px;
+}
+/* no transition — this snaps off in one frame rather than fading, since a
+   soft crossfade read as the site just being slow to remove it */
+#preloader.preloader-hidden{display:none;}
+#preloader-brand,#preloader-percent{
+  font-family:'HN',sans-serif;font-weight:700;font-size:clamp(13px,min(1.08vw,1.728vh),15.6px);
+  letter-spacing:-.01em;text-transform:uppercase;color:#000;white-space:nowrap;
+}
+#preloader-photo{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:150px;height:100px;overflow:hidden;pointer-events:none;
+}
+#preloader-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;}
+#preloader-photo img.on{display:block;}
+
+@media (max-width:1024px){
+  #preloader{align-items:flex-start;}
+}
+
 /* ── screen 1 ── */
 #screen1{position:relative;height:100vh;overflow:hidden;}
 
@@ -418,44 +449,60 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
    visual — the scrim itself has pointer-events:none so mousing over the
    empty page around it doesn't keep the panel open; only leaving the
    cluster box closes it. */
+/* one CSS grid instead of six hand-placed position:absolute + calc()
+   offsets. grid-auto-flow:column with 3 rows fills column-by-column —
+   with the 5 .rail-thumb images (order = whichever "other" looks are
+   currently assigned, see setActiveLook in main.js) followed by
+   .c-rail-main in DOM order, that lands thumb 1-3 down the left column
+   and thumb 4-5 + main down the right column, matching the original
+   layout exactly.
+   height uses min(vw, vh) — aspect-ratio then derives the width — so the
+   whole cluster shrinks on a short window instead of overflowing past
+   the top of the viewport the way the old pure-vw sizing did. */
 #concept-canvas > .c-rail-cluster{
-  position:fixed;bottom:24px;right:.75vw;width:24.39vw;height:60.31vw;
+  position:fixed;bottom:24px;right:.75vw;
+  height:min(60.31vw,calc(100vh - 48px));aspect-ratio:24.39/60.31;
   z-index:10;
+  display:grid;grid-auto-flow:column;
+  grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,1fr);
+  gap:5.753% 2.746%; /* = 3.47vw/60.31vw and .67vw/24.39vw, the original row/column gaps, as % so they scale with whichever dimension (vw or vh) ends up driving the size above */
   opacity:0;pointer-events:none;
 }
 #concept-canvas > .c-rail-cluster.in-view{opacity:1;pointer-events:auto;}
+
+/* full-bleed translucent scrim behind the grid, revealed on hover — a
+   pseudo-element rather than a wrapping div, since .c-rail-main and the 5
+   .rail-thumb images are now siblings sharing one grid instead of main
+   sitting outside a separate "hidden" container */
+.c-rail-cluster::before{
+  content:'';
+  position:fixed;left:0;right:0;bottom:0;width:100vw;
+  height:calc(min(60.31vw,calc(100vh - 48px)) + 48px);
+  background:rgba(255,255,255,.85);
+  opacity:0;pointer-events:none;transition:opacity .3s ease;
+  z-index:-1;
+}
+.c-rail-cluster:hover::before{opacity:1;}
 
 /* transparent, not multiply-over-white: this box sits inside a fixed-position
    ancestor (.c-rail-cluster), which always establishes its own stacking
    context, so mix-blend-mode here has nothing behind it to blend with and
    would just paint the white background solid instead of hiding it */
-.c-rail-main{position:absolute;right:0;bottom:0;width:11.86vw;height:17.79vw;z-index:2;cursor:pointer;}
+.c-rail-main{position:relative;cursor:pointer;}
 .c-rail-main img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:bottom center;display:none;pointer-events:none;}
 .c-rail-main img.on{display:block;}
 
-.c-rail-hidden{
-  position:fixed;left:0;right:0;bottom:0;width:100vw;
-  height:calc(17.79vw * 3 + 3.47vw * 2 + 24px + 24px);
-  background:rgba(255,255,255,.85);
-  opacity:0;pointer-events:none;transition:opacity .3s ease;
-  z-index:1;
+/* pointer-events:none by default — .c-rail-cluster is position:fixed over
+   the bottom-right of the viewport on every screen regardless of scroll
+   position, and these fade in only on hover (opacity below); without this
+   they'd stay hit-testable even while invisible, silently eating
+   drag/click gestures meant for whatever's underneath on other screens. */
+.rail-thumb{
+  width:100%;height:100%;object-fit:contain;object-position:bottom center;
+  pointer-events:none;mix-blend-mode:multiply;
+  opacity:0;transition:opacity .3s ease;
 }
-.c-rail-cluster:hover .c-rail-hidden{opacity:1;}
-
-/* pointer-events:none by default — these sit inside .c-rail-hidden, which
-   stays in the DOM (just opacity:0) even pre-hover, and .c-rail-cluster is
-   position:fixed over the bottom-right of the viewport on every screen
-   regardless of scroll position. Without this, they'd stay hit-testable
-   while invisible, silently eating drag/click gestures meant for whatever
-   is underneath on other screens. Re-enabled only while the cluster is
-   actually hovered open, so they can act as look navigation then. */
-.rail-thumb{position:absolute;width:11.86vw;height:17.79vw;object-fit:contain;object-position:bottom center;right:.75vw;pointer-events:none;mix-blend-mode:multiply;}
-.c-rail-cluster:hover .rail-thumb{pointer-events:auto;cursor:pointer;}
-.rt-1{right:calc(.75vw + 12.53vw);bottom:calc(24px + 2 * (17.79vw + 3.47vw));}
-.rt-2{right:calc(.75vw + 12.53vw);bottom:calc(24px + 1 * (17.79vw + 3.47vw));}
-.rt-3{right:calc(.75vw + 12.53vw);bottom:24px;}
-.rt-4{right:.75vw;bottom:calc(24px + 2 * (17.79vw + 3.47vw));}
-.rt-5{right:.75vw;bottom:calc(24px + 1 * (17.79vw + 3.47vw));}
+.c-rail-cluster:hover .rail-thumb{opacity:1;pointer-events:auto;cursor:pointer;}
 
 @media (max-width:1024px){
   .c-rail-cluster{display:none;}
@@ -494,7 +541,16 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
      which is what let the top row's models start getting cut off by the
      fixed header immediately, before any real scrolling. dvh tracks the
      actual visible viewport instead. */
-  #gallery{height:100dvh;}
+  #gallery{height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;}
+  /* scroll-snap only between these first two screens: with everything
+     fitting in one view, there's nothing worth pausing at halfway between
+     them, and stopping there mid-scroll used to leave row 1 of the grid
+     looking cropped behind the fixed header. mandatory + scroll-snap-stop
+     forces a full snap past that point instead of settling on it. Scoped
+     to just #gallery/#screen1 (not set as html's default behavior further
+     down the page) so the long concept/about/contact scroll stays free. */
+  html{scroll-snap-type:y mandatory;}
+  #screen1{scroll-snap-align:start;scroll-snap-stop:always;}
   #grid-wrap{
     grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,1fr);
     /* clears the fixed header so row 1's models don't start out partly

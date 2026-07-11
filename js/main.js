@@ -336,10 +336,17 @@ document.querySelectorAll('input[name="scroll-mode"]').forEach(radio => {
   });
 });
 
-// ── concept page: collage photos pop in on scroll, once each, only while
-// scrolling down. The col-* clusters are excluded — those are always
+// ── concept page: collage photos pop in once each, the first time they
+// scroll into view. The col-* clusters are excluded — those are always
 // visible (see the CSS), this reveal is only for the single-garment m-*
 // crops ──
+// reveals in either scroll direction (not just scrolling down) — the rail
+// cluster and look-nav can jump the page straight to a look via
+// scrollIntoView, and a fast programmatic jump like that can cross an
+// image's viewport window between two IntersectionObserver samples without
+// ever reporting it as "intersecting while scrolling down"; if scrolling
+// up were excluded, revisiting that look from below would leave its
+// images permanently stuck invisible.
 const collageImgs = [...document.querySelectorAll('.c-collage-img:not(.c-col)')];
 const COLLAGE_DELAYS = [
   0, 450, 150, 50,      // look 1: cm1-4
@@ -350,19 +357,9 @@ const COLLAGE_DELAYS = [
   300, 450, 500, 550, 600, // look 6: m1-5
 ];
 
-// reveal only fires while actively scrolling down; scrolling up never
-// triggers or un-triggers it, and each image only ever reveals once
-let lastScrollYForReveal = window.scrollY;
-let scrollingDownForReveal = true;
-window.addEventListener('scroll', () => {
-  const y = window.scrollY;
-  scrollingDownForReveal = y > lastScrollYForReveal;
-  lastScrollYForReveal = y;
-}, { passive: true });
-
 const collageObserver = new IntersectionObserver(entries => {
   entries.forEach(entry => {
-    if (!scrollingDownForReveal || !entry.isIntersecting) return;
+    if (!entry.isIntersecting) return;
     const img = entry.target;
     const delay = COLLAGE_DELAYS[collageImgs.indexOf(img)] ?? 0;
     setTimeout(() => img.classList.add('revealed'), delay);
@@ -558,7 +555,7 @@ if (conceptSection && (railCluster || lookNav)) {
 // ── concept page: active-look thumbnail auto-turns, freezes on frame 1 while hovered,
 // and swaps to whichever look's block is currently scrolled into view ──
 const railMain = document.querySelector('.c-rail-main');
-const railThumbs = [...document.querySelectorAll('.rail-thumb')]; // rt-1..rt-5, in DOM order
+const railThumbs = [...document.querySelectorAll('.rail-thumb')]; // 5 thumbs, in DOM order — position comes from the CSS grid, not per-element classes
 if (railCluster && railMain) {
   let activeImgs = [];
   let activeFrame = 0;
@@ -743,3 +740,92 @@ showLook(0, 0);
 updateGrid(0);
 updateLabel();
 startPlay();
+
+// ── preloader ──
+// small crossfading photo, reusing the same 15 shots split across #about's
+// 5 photo loops above, just cycling through all of them in one box here
+buildPhotoLoop('preloader-photo', [
+  'assets/images/concept-1-1.avif',
+  'assets/images/concept-1-1-1.avif',
+  'assets/images/concept-1-3.avif',
+  'assets/images/concept-2-1.avif',
+  'assets/images/concept-2-2.avif',
+  'assets/images/concept-2-3.avif',
+  'assets/images/concept-3-1.avif',
+  'assets/images/concept-3-2.avif',
+  'assets/images/concept-3-3.avif',
+  'assets/images/concept-4-1.avif',
+  'assets/images/concept-4-2.avif',
+  'assets/images/concept-4-3.avif',
+  'assets/images/concept-5-1.avif',
+  'assets/images/concept-5-2.avif',
+  'assets/images/concept-5-3.avif',
+], 70);
+
+// tracks every real <img> on the page (everything built above has already
+// run by this point, so this sees the full set, both the ones written
+// directly in index.html and the ones created via new Image() throughout
+// this file) and snaps the preloader off (no fade) once they've all
+// settled — excludes the preloader's own cycling photo above, which isn't
+// page content to wait on. A percentage that only ever moves forward
+// reads better than one that can jump backward, so the displayed number
+// is clamped to the loaded/total ratio's running max.
+(function initPreloader() {
+  const preloaderEl = document.getElementById('preloader');
+  const percentEl = document.getElementById('preloader-percent');
+  if (!preloaderEl) return;
+
+  const imgs = [...document.querySelectorAll('img')].filter(img => !img.closest('#preloader'));
+  const total = imgs.length || 1;
+  let loaded = 0;
+  let shownPercent = 0;
+  let allLoaded = false;
+
+  const startTime = performance.now();
+  // on a fast connection (or served locally) every image can finish
+  // loading within a couple frames, which doesn't leave the percentage
+  // or the cycling photo any time to actually be seen — hold the
+  // preloader up for at least this long regardless of real load speed,
+  // but no longer: a real slow load should still just take as long as it
+  // takes, this only pads out the fast case
+  const MIN_VISIBLE_MS = 1000;
+
+  function finish() {
+    preloaderEl.classList.add('preloader-hidden');
+    preloaderEl.remove();
+  }
+
+  function tryFinish() {
+    if (!allLoaded) return;
+    const remaining = MIN_VISIBLE_MS - (performance.now() - startTime);
+    if (remaining > 0) setTimeout(finish, remaining);
+    else finish();
+  }
+
+  function onSettle() {
+    loaded++;
+    const pct = Math.floor((loaded / total) * 100);
+    if (pct > shownPercent) {
+      shownPercent = pct;
+      percentEl.textContent = shownPercent + '%';
+    }
+    if (loaded >= total) {
+      allLoaded = true;
+      tryFinish();
+    }
+  }
+
+  imgs.forEach(img => {
+    if (img.complete) {
+      onSettle();
+    } else {
+      img.addEventListener('load', onSettle, { once: true });
+      img.addEventListener('error', onSettle, { once: true });
+    }
+  });
+
+  // safety fallback so one stalled asset can't block the site forever
+  setTimeout(() => {
+    if (!preloaderEl.classList.contains('preloader-hidden')) finish();
+  }, 8000);
+})();

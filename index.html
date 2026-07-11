@@ -8,6 +8,16 @@
 </head>
 <body>
 
+<!-- preloader: full-screen takeover shown until every image on the page
+     has loaded (or the safety timeout fires) — see main.js for the
+     load-tracking logic and the buildPhotoLoop call cycling this image
+     through the same photos used in #about -->
+<div id="preloader">
+  <span id="preloader-brand">Vin Shturmer</span>
+  <span id="preloader-percent">0%</span>
+  <div id="preloader-photo"></div>
+</div>
+
 <!-- fixed look nav, vertically centered, shown while scrolling through concept -->
 <div class="look-nav">
   <span class="look-nav-item" data-look="1">Look 1</span>
@@ -79,15 +89,17 @@
 
     <div id="concept-photo" class="c-photo"></div>
 
+    <!-- one grid: grid-auto-flow:column (see style.css) fills left column
+         top-to-bottom then right column top-to-bottom, so this DOM order
+         (5 thumbs, then main last) lands main in the bottom-right cell,
+         matching the original hand-placed layout -->
     <div class="c-rail-cluster">
+      <img class="rail-thumb" src="assets/images/look-4-frame-1.avif" alt="Look 4">
+      <img class="rail-thumb" src="assets/images/look-5-frame-1.avif" alt="Look 5">
+      <img class="rail-thumb" src="assets/images/look-6-frame-1.avif" alt="Look 6">
+      <img class="rail-thumb" src="assets/images/look-1-frame-1.avif" alt="Look 1">
+      <img class="rail-thumb" src="assets/images/look-2-frame-1.avif" alt="Look 2">
       <div class="c-rail-main"></div>
-      <div class="c-rail-hidden">
-        <img class="rail-thumb rt-1" src="assets/images/look-4-frame-1.avif" alt="Look 4">
-        <img class="rail-thumb rt-2" src="assets/images/look-5-frame-1.avif" alt="Look 5">
-        <img class="rail-thumb rt-3" src="assets/images/look-6-frame-1.avif" alt="Look 6">
-        <img class="rail-thumb rt-4" src="assets/images/look-1-frame-1.avif" alt="Look 1">
-        <img class="rail-thumb rt-5" src="assets/images/look-2-frame-1.avif" alt="Look 2">
-      </div>
     </div>
   </div>
 
