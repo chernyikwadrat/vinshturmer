@@ -490,6 +490,15 @@ for (let look = 1; look <= 6; look++) {
   scrubPhotos[look] = buildScrubPhoto(`scrub-photo-${look}`, names.map(n => `assets/images/${n}.avif`));
 }
 
+// mobile looks' own bottom photo block (Figma "3 screen") — same 5-shot
+// sequences as the desktop scrub photos above, but timer-driven
+// (buildPhotoLoop) rather than scroll-position-driven, since the mockup
+// shows it as a fixed-height block rather than a dedicated tall scroll zone
+for (let look = 1; look <= 6; look++) {
+  const names = SCRUB_PHOTO_NAMES[look] || Array.from({length: 5}, (_, i) => `${look}-photo-${i + 1}`);
+  buildPhotoLoop(`cmb-screen-${look}`, names.map(n => `assets/images/${n}.avif`), 500);
+}
+
 function updateScrubFrames() {
   if (document.documentElement.dataset.scrollMode !== 'scrub') return;
   document.querySelectorAll('.sticky-scrub-zone').forEach(zone => {
@@ -734,6 +743,12 @@ buildDragTurntable('concept-turn-6', FILL_FRAMES(5), FRAME_FIX_FILL[5]);
 for (let look = 1; look <= NL; look++) {
   buildDragTurntable(`concept-turn-mobile-${look}`, NOBG[look - 1], FRAME_FIX[look - 1]);
 }
+
+// mobile-only "Back" link at the bottom of #contact (see .contact-back in
+// style.css) — scrolls back to the top of the page
+document.querySelector('.contact-back')?.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
 
 // ── init ──
 showLook(0, 0);

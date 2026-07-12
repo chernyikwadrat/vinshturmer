@@ -26,7 +26,7 @@ body{font-family:'HN',sans-serif;-webkit-font-smoothing:antialiased;}
   position:fixed;inset:0;z-index:100;
   background:#fff;
   display:flex;justify-content:space-between;align-items:center;
-  padding:12px;
+  padding:10px;
 }
 /* no transition — this snaps off in one frame rather than fading, since a
    soft crossfade read as the site just being slow to remove it */
@@ -145,8 +145,8 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
 }
 .look-nav-item.active{color:#000;}
 #header .nav-left{display:flex;gap:32px;}
-#header a{text-decoration:none;color:#000;cursor:pointer;opacity:.7;}
-#header a:hover{opacity:1;}
+#header a{text-decoration:none;color:#000;cursor:pointer;opacity:1;}
+#header a:hover{opacity:.7;}
 #header .brand{
   position:absolute;left:50%;transform:translateX(-50%);
   font-weight:700;
@@ -164,7 +164,6 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
   display:block;
   font-size:13px;font-weight:700;
   letter-spacing:0;text-transform:uppercase;
-  margin-bottom:4px;
 }
 .caption .line2{
   display:block;
@@ -185,7 +184,7 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
    whichever dimension is actually the tighter constraint. */
 .about-heading{
   position:absolute;left:41.67%;top:10%;
-  font-family:'HN',sans-serif;font-weight:700;font-size:clamp(10px,min(1.08vw,1.728vh),13px);
+  font-family:'HN',sans-serif;font-weight:700;font-size:13px;
   letter-spacing:-.01em;text-transform:uppercase;color:#000;
   white-space:nowrap;
 }
@@ -216,20 +215,18 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
    link here (unlike the Figma frame) since the site already has one
    persistent fixed #header used everywhere, mobile included. */
 @media (max-width:1024px){
-  #about{height:auto;padding:20vw 4vw 12vw;overflow:hidden;}
+  #about{height:100vh;padding: 10px; overflow:hidden;display: flex;flex-direction: column;justify-content: space-around;}
   .about-heading{
     position:static;
     font-size:13px;letter-spacing:-.01em;text-align:center;
-    margin-bottom:4px;
   }
   .about-text{
     position:static;width:100%;
-    font-size:clamp(10px,.9vw,13px);font-weight:500;
+    font-size:13px;font-weight:500;
   }
   .about-row{
     position:static;width:100%;
-    flex-direction:column;align-items:space-between;
-    margin-top:11.4vw;
+    flex-direction:column;align-items:center;gap: 10px;
   }
   .about-photo{width:28.13vw;height:18.75vw;}
   #about-photo-5{display:none;}
@@ -271,7 +268,7 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
 /* ── concept ──
    Whole block is one proportional canvas (1440x3200 reference, ~1:2.222 ratio)
    so the overlapping/staggered collage scales as a unit at any width. */
-#concept{background:#fff;padding-top:64px;}
+#concept{background:#fff;padding-top:0px;}
 #concept-canvas,.concept-canvas{position:relative;width:100%;padding-top:222.22%;}
 #concept-canvas > *,.concept-canvas > *{position:absolute;}
 
@@ -528,12 +525,21 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
      same fixup is harmless here. */
   html,body{overflow-x:hidden;}
 
-  #header{padding:12px;font-size:10px;}
-  #header .nav-left{display:none;}
+  /* mobile header, per Figma node 605:707: brand left, "Collection"/
+     "Gallery" right (no "Concept", no "Contact me" — dropped rather than
+     linking to the page you may already be on) — reordered with `order`
+     instead of touching DOM order, since brand is 2nd and nav-left is 1st
+     in the markup (nav-left needs to visually land on the right here). */
+  #header{padding:10px;font-size:13px;}
+  #header .brand{position:static;transform:none;order:-1;}
+  #header .nav-left{display:flex;gap:10px;order:1;}
+  #header .nav-left a:nth-child(2){display:none;}
+  #header > a{display:none;}
 
   /* the desktop's 3em letter-spacing is tuned for wide screens; at mobile
      widths it overflows the viewport and clips the text */
-  .caption .line2{letter-spacing:.4em;}
+  .caption .line2{letter-spacing:3vw;}
+  .caption-centered{top:35%;}
 
   /* 100dvh instead of the base rule's 100vh: mobile browsers size 100vh
      against the viewport with the address bar hidden, so on first load
@@ -556,7 +562,7 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
     /* clears the fixed header so row 1's models don't start out partly
        behind it, and shrinks all 3 rows a little to leave more breathing
        room above each model's head */
-    padding-top:44px;
+    padding-bottom:10%;
   }
   .grid-item img{height:78%;}
   /* drag-to-rotate is desktop-only on the gallery grid (first screen) — see
@@ -578,7 +584,7 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
      whichever images a look happens to have */
   .cm-block{
     display:flex;flex-direction:column;align-items:center;
-    width:100%;padding:8vw 0 14vw;
+    width:100%;
   }
 
   /* first block in each look: draggable no-bg model. Deliberately not
@@ -597,12 +603,12 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
 
   .cm-label{
     margin-top:5vw;
-    font-family:'HN',sans-serif;font-size:clamp(10px,.9vw,13px);font-weight:500;
+    font-family:'HN',sans-serif;font-size:13px;font-weight:500;
     letter-spacing:-.01em;text-transform:uppercase;color:#000;
   }
   .cm-text{
     margin-top:2.5vw;width:92.5vw;
-    font-size:13px;font-weight:500;letter-spacing:-.01em;
+    font-size:13px; font-weight:500;letter-spacing:-.01em;
     text-align:justify;color:#000;
   }
 
@@ -615,6 +621,113 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
   }
   .cm-gallery img{width:100%;height:55vw;object-fit:cover;}
   .cm-gallery img.cm-full{grid-column:1 / -1;height:100vw;}
+
+  /* ── looks 1-3: real per-look mobile mockups (Figma nodes 650:101/111/121,
+     400x2527 reference canvas — same padding-top aspect-ratio trick as the
+     desktop #concept-canvas, so absolute-positioned children scale as one
+     unit regardless of viewport width). This replaces .cm-turn/.cm-gallery
+     above for these three looks only; looks 4-6 still use the generic flow
+     layout until their own mockups exist.
+     .cmb-hero is the draggable turntable, same as .cm-turn, but with
+     touch-action:pan-y instead of none — it's 107.75% wide (bleeds past
+     both edges per the mockup), and touch-action:none there would swallow
+     any vertical swipe started on top of it. pan-y leaves vertical panning
+     to the browser's native scroll and only intercepts horizontal drags
+     (buildDragTurntable only ever reads clientX), the standard split for a
+     horizontal drag surface that also needs to sit in a scrolling page.
+     left/width below are % of the canvas's width (400px reference), as
+     usual for a CSS percentage — but top/height are % of its HEIGHT
+     (2527px reference, i.e. px/2527*100, NOT px/400*100): for an
+     absolutely-positioned box, top/height resolve against the containing
+     block's height, and this canvas's real height only equals a multiple
+     of its width because of the padding-top trick, not 1:1 with it. Mixing
+     up the two divisors (an easy trap once padding-top is already width-
+     relative) is what first made .cmb-hero render as a 4x zoomed crop
+     instead of the intended full-body shot. ── */
+  .cmb-canvas{position:relative;width:100%;padding-top:631.75%;overflow:hidden;}
+  .cmb-canvas > *{position:absolute;}
+  .cmb-canvas img{object-fit:cover;pointer-events:none;}
+
+  .cmb-hero{
+    left:50%;top:2%;width:107.75%;height:25.6%;transform:translateX(-50%);
+    cursor:grab;touch-action:pan-y;
+  }
+  .cmb-hero.active{cursor:grabbing;}
+  .cmb-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;pointer-events:none;}
+  .cmb-hero img.on{display:block;}
+  .cmb-label{
+    left:50%;top:27.78%;transform:translateX(-50%);
+    font-family:'HN',sans-serif;font-weight:700;font-size:13px;
+    letter-spacing:-.01em;text-transform:uppercase;color:#000;white-space:nowrap;
+  }
+  .cmb-text{
+    left:3.75%;top:28.22%;width:92.5%;
+    font-size:13px;font-weight:500;letter-spacing:-.01em;
+    text-align:justify;color:#000;
+  }
+  .cmb-screen-photo{overflow:hidden;}
+  .cmb-screen-photo img{position:absolute;inset:0;width:100%;height:100%;display:none;}
+  .cmb-screen-photo img.on{display:block;}
+
+  /* look 1: peek graphic + 4 staggered/overlapping stills + bottom photo */
+  .cmb-1-peek{left:65.75%;top:1.58%;width:43.25%;height:6.25%;}
+  .cmb-1-m1{left:-7%;top:30.47%;width:82.75%;height:19.67%;}
+  .cmb-1-m2{left:34.5%;top:34.35%;width:82.75%;height:19.67%;}
+  .cmb-1-m4{left:2.5%;top:46.54%;width:82.75%;height:19.67%;}
+  .cmb-1-m3{left:24%;top:56.87%;width:82.75%;height:19.67%;}
+  .cmb-1-screen{left:2.5%;top:79.15%;width:95%;height:10.03%;}
+
+  /* look 2: peek graphic + full-bleed xl hero + 2 closeups + bottom photo */
+  .cmb-2-peek{left:22%;top:1.86%;width:80.5%;height:5.9%;}
+  .cmb-2-xl{left:-40%;top:30%;width:auto;height:32%;mix-blend-mode:multiply;}
+  .cmb-2-m2{left:65.5%;top:39.06%;width:40%;height:9.5%;}
+  .cmb-2-m3{left:65.5%;top:52.7%;width:40%;height:9.5%;}
+  .cmb-2-screen{left:2.5%;top:72.89%;width:95%;height:22.56%;}
+
+  /* look 3: peek graphic + xl hero + 2 closeups + bottom photo */
+  .cmb-3-peek{left:26.25%;top:.71%;width:73.7%;height:9.94%;}
+  .cmb-3-xl{left:-14.75%;top:40.36%;width:117.5%;height:30.83%;}
+  .cmb-3-m1{left:-5.75%;top:30.87%;width:40%;height:9.5%;}
+  .cmb-3-m2{left:10%;top:32.25%;width:40%;height:9.5%;}
+  .cmb-3-screen{left:2.5%;top:79.16%;width:95%;height:10.03%;}
+
+  /* ── looks 4-6: Figma nodes 650:131/141/151 — same system as 1-3, but a
+     400x2368 reference canvas (shorter than looks 1-3's 2527), so the
+     shared .cmb-hero/.cmb-label/.cmb-text top/height % need their own
+     values for this height too — hence the .cmb-canvas-b modifier. ── */
+  .cmb-canvas-b{padding-top:592%;}
+  .cmb-canvas-b .cmb-hero{top:2%;height:27.32%;}
+  .cmb-canvas-b .cmb-label{top:29.65%;}
+  .cmb-canvas-b .cmb-text{top:30.11%;}
+
+  /* look 4: 2 peek graphics + 5 staggered stills + bottom photo */
+  .cmb-4-peek1{left:-5.75%;top:11.22%;width:74.41%;height:15.62%;}
+  .cmb-4-peek2{left:28.1%;top:1.9%;width:74.3%;height:10.4%;}
+  .cmb-4-m1{left:-9.5%;top:30.66%;width:69.78%;height:17.68%;}
+  .cmb-4-m2{left:15.21%;top:35.89%;width:69.78%;height:17.68%;}
+  .cmb-4-m3{left:39.71%;top:38.02%;width:69.78%;height:17.68%;}
+  .cmb-4-m4{left:-.5%;top:43.78%;width:69.78%;height:17.68%;}
+  .cmb-4-m5{left:84.95%;top:50.51%;width:69.78%;height:17.68%;}
+  .cmb-4-screen{left:2.5%;top:77.74%;width:95%;height:10.7%;}
+
+  /* look 5: 2 peek graphics + 4 staggered stills + bottom photo pair */
+  .cmb-5-peek1{left:53%;top:37.58%;width:42.28%;height:9.03%;}
+  .cmb-5-peek2{left:-11%;top:17.82%;width:57.75%;height:9.63%;}
+  .cmb-5-m1{left:-15.75%;top:31.33%;width:80.51%;height:20.4%;}
+  .cmb-5-m2{left:9.75%;top:34.12%;width:80.51%;height:20.4%;}
+  .cmb-5-m3{left:36%;top:43.33%;width:80.51%;height:20.4%;}
+  .cmb-5-m4{left:-4.25%;top:47.3%;width:80.51%;height:20.4%;}
+  .cmb-5-screen{left:2.5%;top:71.07%;width:95%;height:24.07%;}
+
+  /* look 6: 1 tall peek graphic + 5 staggered stills (m3 bleeds off the
+     right edge, matching the mockup) + bottom photo */
+  .cmb-6-peek{left:13.25%;top:0%;width:73.57%;height:29.65%;}
+  .cmb-6-m4{left:3.1%;top:32.81%;width:73.39%;height:18.59%;}
+  .cmb-6-m3{left:102.99%;top:37.15%;width:73.39%;height:18.59%;}
+  .cmb-6-m2{left:21.17%;top:52.23%;width:73.39%;height:18.59%;}
+  .cmb-6-m5{left:-10%;top:43.48%;width:73.39%;height:18.59%;}
+  .cmb-6-m1{left:44%;top:39.15%;width:73.35%;height:18.58%;}
+  .cmb-6-screen{left:2.5%;top:77.74%;width:95%;height:10.7%;}
 }
 
 /* ── contact / about the designer (1440x900 reference, single viewport) ──
@@ -648,29 +761,48 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
    that gap shrinks, and the two collide. */
 .contact-bio{
   width:100%;
-  font-family:'HN',sans-serif;font-weight:500;font-size:clamp(10px,min(1.08vw,1.728vh),13px);
+  font-family:'HN',sans-serif;font-weight:500;font-size:13px;
   letter-spacing:-.01em;text-align:justify;color:#000;
 }
 .contact-links{
   width:200%; /* twice the column, matching the Figma frame's own ratio */
   margin-top:-1em;
   display:flex;flex-direction:column;align-items:center;
-  font-family:'HN',sans-serif;font-weight:700;font-size:clamp(10px,min(1.08vw,1.728vh),13px);
+  font-family:'HN',sans-serif;font-weight:700;font-size:13px;
   letter-spacing:-.01em;text-align:center;text-transform:uppercase;color:#000;
   white-space:nowrap;
 }
 
 .contact-sayhi{
   position:absolute;left:50%;bottom:1.11%;transform:translateX(-50%);
-  font-family:'HN',sans-serif;font-weight:700;font-size:clamp(10px,min(1.08vw,1.728vh),13px);
+  font-family:'HN',sans-serif;font-weight:700;font-size:13px;
   letter-spacing:-.01em;text-transform:uppercase;color:#000;
 }
+.contact-back{display:none;}
 
 @media (max-width:1024px){
-  #contact{height:auto;padding:20vw 4vw 12vw;overflow:hidden;}
-  .contact-photo{position:static;width:28.13vw;height:28.13vw;transform:none;margin:0 auto 6vw;}
+  /* per Figma node 605:707: bio+links centered flow, a 120px (30vw) photo
+     below, and a "Back" link at the very bottom instead of desktop's
+     "Say hi" — wired in main.js to scroll back to the top of the page. */
+  #contact{height:100vh;padding:10px;overflow:hidden;display: flex;flex-direction: column;justify-content:space-around;align-items: center;}
+  /* position:relative, not static — its child img is position:absolute;
+     inset:0, which needs *this* box as the positioning context; static
+     would let it escape to the nearest positioned ancestor (#contact)
+     and render at that much larger size instead. left/top:auto resets
+     the desktop rule's left:50%/top:50% — those still apply to a
+     position:relative box (offsetting it from its normal flow position),
+     which was pushing this off-center despite the margin:auto below. */
+  .contact-photo{position:relative;left:auto;top:auto;width:30vw;height:30vw;transform:none;}
   .contact-text{position:static;width:100%;align-items:center;}
-  .contact-bio{font-size:clamp(10px,.9vw,13px);text-align:left;}
-  .contact-links{width:100%;margin-top:4vw;}
-  .contact-sayhi{position:static;margin-top:8vw;transform:none;}
+  .contact-bio{font-size:13px;text-align:justify;}
+  .contact-links{width:100%;}
+  .contact-sayhi{
+    position: relative;
+    display:block;width:100%;
+    background:none;border:none;padding:0;
+    font-family:'HN',sans-serif;font-weight:700;font-size:13px;
+    letter-spacing:-.01em;text-transform:uppercase;color:#000;
+    text-align:center;cursor:pointer;
+  }
+
 }

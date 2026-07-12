@@ -8,7 +8,7 @@
      Pages' CDN caches these for 10 minutes and phone browsers often hold
      on far longer than that, so without a changing URL a visitor's cached
      copy can survive many deploys past whatever's actually live -->
-<link rel="stylesheet" href="css/style.css?v=202607111516">
+<link rel="stylesheet" href="css/style.css?v=202607120000">
 </head>
 <body>
 
@@ -64,11 +64,13 @@
 
 <!-- screen: about / general concept intro -->
 <section id="about">
+  <div>
   <p class="about-heading">Concept of the collection</p>
   <div class="about-text">
     <p>For cut and silhouette, then I intend to use negative space from collages and my own physical form exploration. As part of a textile narrative, a range of my photographs featuring different textures will be used. I tend to use knitting, weaving, and tweed techniques for my collection, making textiles my primary focus. I'm still uncertain about the seams and finishing, but I'm considering keeping it neat and classy.</p>
     <p>Overall, the project combines the destructiveness of the urban environment and abandonment in the form of certain objects and also addresses the inner abandoned and forsaken feelings.</p>
   </div>
+</div>
   <div class="about-row">
     <div class="about-photo" id="about-photo-1"></div>
     <div class="about-photo" id="about-photo-2"></div>
@@ -111,18 +113,19 @@
     <div class="sticky-scrub-inner"><div class="sticky-scrub-photo scrub-size-a" id="scrub-photo-1"></div></div>
   </div>
 
-  <!-- mobile-only stacked layout for look 1 (desktop canvas above is hidden
-       under the mobile breakpoint); see .cm-block rules in style.css -->
+  <!-- mobile-only layout for look 1, matching Figma node 650:101 (400x2527
+       reference canvas) — see .cmb-* rules in style.css -->
   <div class="cm-block" data-look="1">
-    <div id="concept-turn-mobile-1" class="cm-turn"></div>
-    <p class="cm-label">Look 1</p>
-    <p class="cm-text">The first look explores fragmentation through asymmetry, layering, and contrasting knitted textures. The interaction between soft crochet, transparent mesh, and distorted proportions reflects the uneven and constantly shifting surfaces of the urban environment.</p>
-    <div class="cm-gallery">
-      <img class="cm-full" src="assets/images/1-col-1.avif" alt="">
-      <img class="cm-full" src="assets/images/1-m-1.avif" alt="">
-      <img src="assets/images/1-m-2.avif" alt="">
-      <img src="assets/images/1-m-3.avif" alt="">
-      <img class="cm-full" src="assets/images/1-m-4.avif" alt="">
+    <div class="cmb-canvas">
+      <div id="concept-turn-mobile-1" class="cmb-hero"></div>
+      <p class="cmb-label">Look 1</p>
+      <p class="cmb-text">The first look explores fragmentation through asymmetry, layering, and contrasting knitted textures. The interaction between soft crochet, transparent mesh, and distorted proportions reflects the uneven and constantly shifting surfaces of the urban environment.</p>
+      <img class="cmb-1-peek" src="assets/images/1-col-1.avif" alt="">
+      <img class="cmb-1-m2" src="assets/images/1-m-2.avif" alt="">
+      <img class="cmb-1-m1" src="assets/images/1-m-1.avif" alt="">
+      <img class="cmb-1-m4" src="assets/images/1-m-4.avif" alt="">
+      <img class="cmb-1-m3" src="assets/images/1-m-3.avif" alt="">
+      <div class="cmb-1-screen cmb-screen-photo" id="cmb-screen-1"></div>
     </div>
   </div>
 
@@ -145,18 +148,17 @@
     <div class="sticky-scrub-inner"><div class="sticky-scrub-photo scrub-size-b" id="scrub-photo-2"></div></div>
   </div>
 
-  <!-- mobile-only stacked layout for look 2, by analogy with look 1's
-       .cm-block above — this look only has 4 source images (xl + 2 m-shots
-       + col), one short of the full set, so there's no second cm-full shot -->
+  <!-- mobile-only layout for look 2, matching Figma node 650:111 -->
   <div class="cm-block" data-look="2">
-    <div id="concept-turn-mobile-2" class="cm-turn"></div>
-    <p class="cm-label">Look 2</p>
-    <p class="cm-text">The second look focuses on tension, distortion, and the relationship between the body and material. Stretched tights form a fragile surface around the silhouette, reflecting both physical pressure and the instability associated with a constantly transforming urban space.</p>
-    <div class="cm-gallery">
-      <img class="cm-full" src="assets/images/2-col-1.avif" alt="">
-      <img class="cm-full" src="assets/images/2-xl.avif" alt="">
-      <img src="assets/images/2-m-2.avif" alt="">
-      <img src="assets/images/2-m-3.avif" alt="">
+    <div class="cmb-canvas">
+      <img class="cmb-2-peek" src="assets/images/2-col-1.avif" alt="">
+      <div id="concept-turn-mobile-2" class="cmb-hero"></div>
+      <img class="cmb-2-xl" src="assets/images/2-xl.avif" alt="">
+      <p class="cmb-label">Look 2</p>
+      <p class="cmb-text">The second look focuses on tension, distortion, and the relationship between the body and material. Stretched tights form a fragile surface around the silhouette, reflecting both physical pressure and the instability associated with a constantly transforming urban space.</p>
+      <div class="cmb-2-screen cmb-screen-photo" id="cmb-screen-2"></div>
+      <img class="cmb-2-m2" src="assets/images/2-m-2.avif" alt="">
+      <img class="cmb-2-m3" src="assets/images/2-m-3.avif" alt="">
     </div>
   </div>
 
@@ -180,18 +182,17 @@
     <div class="sticky-scrub-inner"><div class="sticky-scrub-photo scrub-size-a" id="scrub-photo-3"></div></div>
   </div>
 
-  <!-- mobile-only stacked layout for look 3, by analogy with look 1's
-       .cm-block above -->
+  <!-- mobile-only layout for look 3, matching Figma node 650:121 -->
   <div class="cm-block" data-look="3">
-    <div id="concept-turn-mobile-3" class="cm-turn"></div>
-    <p class="cm-label">Look 3</p>
-    <p class="cm-text">The third look explores reconstruction through layered garments and displaced elements of classical clothing. The combination of tailoring, transparent surfaces, and fragmented construction reflects the city as a structure continuously dismantled and reassembled.</p>
-    <div class="cm-gallery">
-      <img class="cm-full" src="assets/images/3-col-1.avif" alt="">
-      <img class="cm-full" src="assets/images/3-xl.avif" alt="">
-      <img src="assets/images/3-m-1.avif" alt="">
-      <img src="assets/images/3-m-2.avif" alt="">
-      <img class="cm-full" src="assets/images/3-m-3.avif" alt="">
+    <div class="cmb-canvas">
+      <img class="cmb-3-peek" src="assets/images/3-col-1.avif" alt="">
+      <div id="concept-turn-mobile-3" class="cmb-hero"></div>
+      <p class="cmb-label">Look 3</p>
+      <p class="cmb-text">The third look explores reconstruction through layered garments and displaced elements of classical clothing. The combination of tailoring, transparent surfaces, and fragmented construction reflects the city as a structure continuously dismantled and reassembled.</p>
+      <img class="cmb-3-xl" src="assets/images/3-xl.avif" alt="">
+      <img class="cmb-3-m1" src="assets/images/3-m-1.avif" alt="">
+      <img class="cmb-3-m2" src="assets/images/3-m-2.avif" alt="">
+      <div class="cmb-3-screen cmb-screen-photo" id="cmb-screen-3"></div>
     </div>
   </div>
 
@@ -215,20 +216,20 @@
     <div class="sticky-scrub-inner"><div class="sticky-scrub-photo scrub-size-c" id="scrub-photo-4"></div></div>
   </div>
 
-  <!-- mobile-only stacked layout for look 4, by analogy with look 1's
-       .cm-block above — desktop has 5 m-shots + 2 col graphics, more than
-       the 5-slot mobile pattern fits, so this picks the same representative
-       subset (col1, m1-m4) rather than cramming all 7 in -->
+  <!-- mobile-only layout for look 4, matching Figma node 650:131 -->
   <div class="cm-block" data-look="4">
-    <div id="concept-turn-mobile-4" class="cm-turn"></div>
-    <p class="cm-label">Look 4</p>
-    <p class="cm-text">The fourth look translates urban fragmentation into knitted and pleated structures. Exposed seams, separate knitted sections, and the architectural rhythm of pleating create a silhouette that appears simultaneously constructed, unfinished, and in a state of transformation.</p>
-    <div class="cm-gallery">
-      <img class="cm-full" src="assets/images/4-col-1.avif" alt="">
-      <img class="cm-full" src="assets/images/4-m-1.avif" alt="">
-      <img src="assets/images/4-m-2.avif" alt="">
-      <img src="assets/images/4-m-3.avif" alt="">
-      <img class="cm-full" src="assets/images/4-m-4.avif" alt="">
+    <div class="cmb-canvas cmb-canvas-b">
+      <img class="cmb-4-peek1" src="assets/images/4-col-1.avif" alt="">
+      <img class="cmb-4-peek2" src="assets/images/4-col-1-1.avif" alt="">
+      <div id="concept-turn-mobile-4" class="cmb-hero"></div>
+      <p class="cmb-label">Look 4</p>
+      <p class="cmb-text">The fourth look translates urban fragmentation into knitted and pleated structures. Exposed seams, separate knitted sections, and the architectural rhythm of pleating create a silhouette that appears simultaneously constructed, unfinished, and in a state of transformation.</p>
+      <img class="cmb-4-m1" src="assets/images/4-m-1.avif" alt="">
+      <img class="cmb-4-m2" src="assets/images/4-m-2.avif" alt="">
+      <img class="cmb-4-m3" src="assets/images/4-m-3.avif" alt="">
+      <img class="cmb-4-m4" src="assets/images/4-m-4.avif" alt="">
+      <img class="cmb-4-m5" src="assets/images/4-m-5.avif" alt="">
+      <div class="cmb-4-screen cmb-screen-photo" id="cmb-screen-4"></div>
     </div>
   </div>
 
@@ -251,18 +252,19 @@
     <div class="sticky-scrub-inner"><div class="sticky-scrub-photo scrub-size-b" id="scrub-photo-5"></div></div>
   </div>
 
-  <!-- mobile-only stacked layout for look 5, by analogy with look 1's
-       .cm-block above — desktop has 2 col graphics, picks col1 for the peek -->
+  <!-- mobile-only layout for look 5, matching Figma node 650:141 -->
   <div class="cm-block" data-look="5">
-    <div id="concept-turn-mobile-5" class="cm-turn"></div>
-    <p class="cm-label">Look 5</p>
-    <p class="cm-text">The fifth look combines metallic surfaces with controlled deformation and a simplified elongated silhouette. The contrast between the silver knitted dress and the black outer layer refers to industrial materials, compressed structures, and the changing physical surfaces of the city.</p>
-    <div class="cm-gallery">
-      <img class="cm-full" src="assets/images/5-col-1.avif" alt="">
-      <img class="cm-full" src="assets/images/5-m-1.avif" alt="">
-      <img src="assets/images/5-m-2.avif" alt="">
-      <img src="assets/images/5-m-3.avif" alt="">
-      <img class="cm-full" src="assets/images/5-8.avif" alt="">
+    <div class="cmb-canvas cmb-canvas-b">
+      <img class="cmb-5-peek1" src="assets/images/5-col-2.avif" alt="">
+      <img class="cmb-5-peek2" src="assets/images/5-col-1.avif" alt="">
+      <div id="concept-turn-mobile-5" class="cmb-hero"></div>
+      <p class="cmb-label">Look 5</p>
+      <p class="cmb-text">The fifth look combines metallic surfaces with controlled deformation and a simplified elongated silhouette. The contrast between the silver knitted dress and the black outer layer refers to industrial materials, compressed structures, and the changing physical surfaces of the city.</p>
+      <img class="cmb-5-m1" src="assets/images/5-m-1.avif" alt="">
+      <img class="cmb-5-m2" src="assets/images/5-m-2.avif" alt="">
+      <img class="cmb-5-m4" src="assets/images/5-8.avif" alt="">
+      <img class="cmb-5-m3" src="assets/images/5-m-3.avif" alt="">
+      <div class="cmb-5-screen cmb-screen-photo" id="cmb-screen-5"></div>
     </div>
   </div>
 
@@ -287,19 +289,20 @@
     <div class="sticky-scrub-inner"><div class="sticky-scrub-photo scrub-size-c" id="scrub-photo-6"></div></div>
   </div>
 
-  <!-- mobile-only stacked layout for look 6, by analogy with look 1's
-       .cm-block above — desktop has 5 m-shots in a row, picks the same
-       representative subset (m1-m4) as the other over-full looks -->
+  <!-- mobile-only layout for look 6, matching Figma node 650:151 —
+       m3 intentionally bleeds off the right edge, per the mockup -->
   <div class="cm-block" data-look="6">
-    <div id="concept-turn-mobile-6" class="cm-turn"></div>
-    <p class="cm-label">Look 6</p>
-    <p class="cm-text">The final look explores urban texture through draping, irregular volume, and the natural deformation of fabric. Its fragmented folds and unfinished visual rhythm reflect the city as a tactile landscape shaped by continuous processes of decay, reconstruction, and renewal.</p>
-    <div class="cm-gallery">
-      <img class="cm-full" src="assets/images/6-col-1.avif" alt="">
-      <img class="cm-full" src="assets/images/6-m-1.avif" alt="">
-      <img src="assets/images/6-m-2.avif" alt="">
-      <img src="assets/images/6-m-3.avif" alt="">
-      <img class="cm-full" src="assets/images/6-m-4.avif" alt="">
+    <div class="cmb-canvas cmb-canvas-b">
+      <img class="cmb-6-peek" src="assets/images/6-col-1.avif" alt="">
+      <img class="cmb-6-m4" src="assets/images/6-m-4.avif" alt="">
+      <div id="concept-turn-mobile-6" class="cmb-hero"></div>
+      <p class="cmb-label">Look 6</p>
+      <p class="cmb-text">The final look explores urban texture through draping, irregular volume, and the natural deformation of fabric. Its fragmented folds and unfinished visual rhythm reflect the city as a tactile landscape shaped by continuous processes of decay, reconstruction, and renewal.</p>
+      <img class="cmb-6-m3" src="assets/images/6-m-3.avif" alt="">
+      <img class="cmb-6-m2" src="assets/images/6-m-2.avif" alt="">
+      <img class="cmb-6-m5" src="assets/images/6-m-5.avif" alt="">
+      <div class="cmb-6-screen cmb-screen-photo" id="cmb-screen-6"></div>
+      <img class="cmb-6-m1" src="assets/images/6-m-1.avif" alt="">
     </div>
   </div>
 </section>
@@ -318,6 +321,6 @@
   <p class="contact-sayhi">Say hi</p>
 </section>
 
-<script src="js/main.js?v=202607111516"></script>
+<script src="js/main.js?v=202607120000"></script>
 </body>
 </html>
