@@ -8,7 +8,11 @@
      Pages' CDN caches these for 10 minutes and phone browsers often hold
      on far longer than that, so without a changing URL a visitor's cached
      copy can survive many deploys past whatever's actually live -->
-<link rel="stylesheet" href="css/style.css?v=202607130000">
+<link rel="stylesheet" href="css/style.css?v=202607130200">
+<!-- hides <body> (see html.pt-hide in style.css) before first paint, so
+     arriving here via the cross-page fade in js/page-transition.js doesn't
+     flash the fully-opaque page before fading in -->
+<script>document.documentElement.classList.add('pt-hide');</script>
 </head>
 <body>
 
@@ -37,7 +41,7 @@
   <div class="nav-left">
     <a>Collection</a>
     <a>Concept</a>
-    <a>Gallery</a>
+    <a href="gallery.html">Gallery</a>
   </div>
   <span class="brand">Vin Shturmer</span>
   <a>Contact me</a>
@@ -352,6 +356,7 @@
   <p class="contact-sayhi">Say hi</p>
 </section>
 
-<script src="js/main.js?v=202607130000"></script>
+<script src="js/main.js?v=202607130200"></script>
+<script src="js/page-transition.js?v=202607130200"></script>
 </body>
 </html>

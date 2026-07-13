@@ -3,7 +3,17 @@
 
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;background:#fff;}
-body{font-family:'HN',sans-serif;-webkit-font-smoothing:antialiased;}
+body{font-family:'HN',sans-serif;-webkit-font-smoothing:antialiased;transition:opacity .25s ease;}
+
+/* ── cross-page fade transition (index.html <-> gallery.html): an inline
+   script in <head> (see index.html/gallery.html) adds .pt-hide to <html>
+   before the stylesheet finishes blocking render, so the page's first
+   paint is already invisible instead of flashing fully-opaque first —
+   js/page-transition.js then removes it on a rAF to fade in, and re-adds
+   it before following a same-tab link to the other page, to fade out
+   first. No JS at all (or the script failing) just leaves body at its
+   normal opacity:1 default, so nothing ever gets stuck invisible. ── */
+html.pt-hide body{opacity:0;}
 
 /* click-dragging over the hero figure or any of the drag-to-rotate
    turntables (grid tiles, concept-page turntables) has no text to select,
@@ -806,3 +816,14 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
   }
 
 }
+
+/* ── gallery page (second page, gallery.html): 33 real photos stacked
+   straight down, full width, edge to edge, each at its own native aspect
+   ratio (no cropping) — the img's width/height attributes in the markup
+   give the browser each one's real ratio so the page doesn't jump as
+   lazy-loaded images arrive. */
+#gallery-page{width:100%;display: flex; flex-direction: column; align-items: flex-start;gap:0px;}
+.gallery-photo-v{display:block;width:auto;height:100vh;}
+.gallery-photo-l{display:block;width:100vw;height:auto;}
+.gallery-photo-m{display:block;width:auto;height:80vh;}
+.gallery-photo-s{display:block;width:auto;height:30vh;}

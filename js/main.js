@@ -110,6 +110,51 @@ const FRAME_FIX_HIRES = {
   4: [[1.1674,1.32,0.03],[1.166,1.606,6.096],[1.2128,0.02,-4.253],[1.2241,-0.328,0.239],[1.1292,1.482,1.885],[1.1483,0.323,2.749],[1.1429,-1.511,-2.189],[1.1503,0.123,0.9]],
 };
 
+// ── progressive image loading ──
+// The gallery grid and hero turntable (screens 1-2) cycle through all 6
+// looks on their own timers, so all of their images have to be ready right
+// away — same for look 1's own concept-page assets (turntable, photo loop,
+// scrub photos, mobile block), which are guaranteed loaded too. Everything
+// belonging to looks 2-6 beyond that, plus the about section, is real
+// extra weight the visitor may never scroll to, so those images don't get
+// requested until their section actually scrolls near the viewport.
+// Deferred images carry .lazy-img so the preloader (below) never waits on
+// them — it only ever blocks on the eager set.
+const LAZY_ROOT_MARGIN = '100% 0px'; // start the real request ~1 viewport-height early
+
+function deferredImg(src) {
+  const img = new Image();
+  img.dataset.src = src;
+  img.draggable = false;
+  img.classList.add('lazy-img');
+  return img;
+}
+
+// fires the real src assignment for every image in the group as soon as any
+// one of triggerEls scrolls near the viewport, then disconnects — a look's
+// assets only ever need to start loading once
+function observeLazyGroup(triggerEls, imgs) {
+  const els = (Array.isArray(triggerEls) ? triggerEls : [triggerEls]).filter(Boolean);
+  if (!els.length) { imgs.forEach(img => { img.src = img.dataset.src; }); return; }
+  const io = new IntersectionObserver(entries => {
+    if (!entries.some(entry => entry.isIntersecting)) return;
+    imgs.forEach(img => { if (!img.src) img.src = img.dataset.src; });
+    io.disconnect();
+  }, { rootMargin: LAZY_ROOT_MARGIN });
+  els.forEach(el => io.observe(el));
+}
+
+// desktop canvas + mobile block for a given look — only one of the two is
+// ever actually laid out at a given viewport width (see the max-width:1024px
+// rule swapping between them), and an element with no box never intersects,
+// so watching both is what makes this work on both layouts
+function lookTriggers(look) {
+  return [
+    document.getElementById(look === 1 ? 'concept-canvas' : `concept-canvas-${look}`),
+    document.querySelector(`.cm-block[data-look="${look}"]`),
+  ];
+}
+
 // ── build background images ──
 const bgWrap = document.getElementById('bg-wrap');
 const bgImgs = BGS.map((src, i) => {
@@ -369,16 +414,18 @@ const collageObserver = new IntersectionObserver(entries => {
 collageImgs.forEach(img => collageObserver.observe(img));
 
 // ── concept page: screen-3 photo loop (reusable — instant snap, small delay between frames) ──
-function buildPhotoLoop(containerId, frames, intervalMs) {
+function buildPhotoLoop(containerId, frames, intervalMs, lazyTrigger) {
   const container = document.getElementById(containerId);
   if (!container) return;
   const photoImgs = frames.map((src, i) => {
-    const img = new Image();
-    img.src = src; img.draggable = false;
+    const img = lazyTrigger ? deferredImg(src) : new Image();
+    if (!lazyTrigger) img.src = src;
+    img.draggable = false;
     img.classList.toggle('on', i === 0);
     container.appendChild(img);
     return img;
   });
+  if (lazyTrigger) observeLazyGroup(lazyTrigger, photoImgs);
 
   let photoFrame = 0;
   setInterval(() => {
@@ -398,59 +445,65 @@ buildPhotoLoop('concept-photo', [
 buildPhotoLoop('concept-photo-2', [
   'assets/images/2-photo-1.jpg',
   'assets/images/2-photo-2.jpg',
-], 500);
+], 500, lookTriggers(2));
 
 // look 3: real photos from Figma
 buildPhotoLoop('concept-photo-3', [
   'assets/images/3-photo-1.jpg',
   'assets/images/3-photo-2.jpg',
-], 500);
+], 500, lookTriggers(3));
 
 // look 6: real photos from Figma
 buildPhotoLoop('concept-photo-6', [
   'assets/images/6-photo-1-src.jpg',
   'assets/images/6-photo-2.jpg',
-], 500);
+], 500, lookTriggers(6));
 
 // about section: 5 urban-texture reference photos, each cycling through its
-// own 3 shots — same timer-driven crossfade as the per-look photo loops above
+// own 3 shots — same timer-driven crossfade as the per-look photo loops
+// above. Not needed for the first two screens or look 1, so deferred like
+// look 2-6's own assets — triggered by the section itself scrolling near.
+const aboutTrigger = document.getElementById('about');
 buildPhotoLoop('about-photo-1', [
   'assets/images/concept-1-1.avif',
   'assets/images/concept-1-1-1.avif',
   'assets/images/concept-1-3.avif',
-], 500);
+], 500, aboutTrigger);
 buildPhotoLoop('about-photo-2', [
   'assets/images/concept-2-1.avif',
   'assets/images/concept-2-2.avif',
   'assets/images/concept-2-3.avif',
-], 500);
+], 500, aboutTrigger);
 buildPhotoLoop('about-photo-3', [
   'assets/images/concept-3-1.avif',
   'assets/images/concept-3-2.avif',
   'assets/images/concept-3-3.avif',
-], 500);
+], 500, aboutTrigger);
 buildPhotoLoop('about-photo-4', [
   'assets/images/concept-4-1.avif',
   'assets/images/concept-4-2.avif',
   'assets/images/concept-4-3.avif',
-], 500);
+], 500, aboutTrigger);
 buildPhotoLoop('about-photo-5', [
   'assets/images/concept-5-1.avif',
   'assets/images/concept-5-2.avif',
   'assets/images/concept-5-3.avif',
-], 500);
+], 500, aboutTrigger);
 
 // look 4 & 5: only one real photo exists for each — mirror it for the second
 // frame so the switch is still visible until a real second photo is provided
-function buildMirroredPhotoLoop(containerId, src, intervalMs) {
+function buildMirroredPhotoLoop(containerId, src, intervalMs, lazyTrigger) {
   const container = document.getElementById(containerId);
   if (!container) return;
-  const frame1 = new Image();
-  frame1.src = src; frame1.draggable = false; frame1.classList.add('on');
-  const frame2 = new Image();
-  frame2.src = src; frame2.draggable = false; frame2.style.transform = 'scaleX(-1)';
+  const frame1 = lazyTrigger ? deferredImg(src) : new Image();
+  if (!lazyTrigger) frame1.src = src;
+  frame1.draggable = false; frame1.classList.add('on');
+  const frame2 = lazyTrigger ? deferredImg(src) : new Image();
+  if (!lazyTrigger) frame2.src = src;
+  frame2.draggable = false; frame2.style.transform = 'scaleX(-1)';
   container.appendChild(frame1);
   container.appendChild(frame2);
+  if (lazyTrigger) observeLazyGroup(lazyTrigger, [frame1, frame2]);
 
   const imgs = [frame1, frame2];
   let frame = 0;
@@ -459,22 +512,25 @@ function buildMirroredPhotoLoop(containerId, src, intervalMs) {
     imgs.forEach((img, i) => img.classList.toggle('on', i === frame));
   }, intervalMs);
 }
-buildMirroredPhotoLoop('concept-photo-4', 'assets/images/4-photo-src.jpg', 500);
-buildMirroredPhotoLoop('concept-photo-5', 'assets/images/5-photo-src.jpg', 500);
+buildMirroredPhotoLoop('concept-photo-4', 'assets/images/4-photo-src.jpg', 500, lookTriggers(4));
+buildMirroredPhotoLoop('concept-photo-5', 'assets/images/5-photo-src.jpg', 500, lookTriggers(5));
 
 // ── concept page: sticky photo scrub (alternate scroll mode) — same photo
 // sources as the timer-driven loops above, but the frame is picked by scroll
 // progress through a dedicated sticky zone instead of a timer ──
-function buildScrubPhoto(id, frames) {
+function buildScrubPhoto(id, frames, lazyTrigger) {
   const container = document.getElementById(id);
   if (!container) return null;
-  return frames.map((src, i) => {
-    const img = new Image();
-    img.src = src; img.draggable = false;
+  const imgs = frames.map((src, i) => {
+    const img = lazyTrigger ? deferredImg(src) : new Image();
+    if (!lazyTrigger) img.src = src;
+    img.draggable = false;
     img.classList.toggle('on', i === 0);
     container.appendChild(img);
     return img;
   });
+  if (lazyTrigger) observeLazyGroup(lazyTrigger, imgs);
+  return imgs;
 }
 
 // each look now has its own 5-shot sequence (N-photo-1..5.avif), replacing
@@ -487,7 +543,7 @@ const SCRUB_PHOTO_NAMES = {
 const scrubPhotos = {};
 for (let look = 1; look <= 6; look++) {
   const names = SCRUB_PHOTO_NAMES[look] || Array.from({length: 5}, (_, i) => `${look}-photo-${i + 1}`);
-  scrubPhotos[look] = buildScrubPhoto(`scrub-photo-${look}`, names.map(n => `assets/images/${n}.avif`));
+  scrubPhotos[look] = buildScrubPhoto(`scrub-photo-${look}`, names.map(n => `assets/images/${n}.avif`), look === 1 ? null : lookTriggers(look));
 }
 
 // mobile looks' own bottom photo block (Figma "3 screen") — same 5-shot
@@ -496,7 +552,7 @@ for (let look = 1; look <= 6; look++) {
 // shows it as a fixed-height block rather than a dedicated tall scroll zone
 for (let look = 1; look <= 6; look++) {
   const names = SCRUB_PHOTO_NAMES[look] || Array.from({length: 5}, (_, i) => `${look}-photo-${i + 1}`);
-  buildPhotoLoop(`cmb-screen-${look}`, names.map(n => `assets/images/${n}.avif`), 500);
+  buildPhotoLoop(`cmb-screen-${look}`, names.map(n => `assets/images/${n}.avif`), 500, look === 1 ? null : lookTriggers(look));
 }
 
 function updateScrubFrames() {
@@ -667,7 +723,7 @@ if (railCluster && railMain) {
 }
 
 // ── concept page: drag-to-rotate turntable (reusable) ──
-function buildDragTurntable(elId, frameSources, frameFix) {
+function buildDragTurntable(elId, frameSources, frameFix, lazyTrigger) {
   const el = document.getElementById(elId);
   if (!el) return;
 
@@ -678,8 +734,9 @@ function buildDragTurntable(elId, frameSources, frameFix) {
     [el.previousElementSibling, el.nextElementSibling].find(sib => sib?.classList.contains('turn-hint'));
 
   const turnImgs = frameSources.map((src, i) => {
-    const img = new Image();
-    img.src = src; img.draggable = false;
+    const img = lazyTrigger ? deferredImg(src) : new Image();
+    if (!lazyTrigger) img.src = src;
+    img.draggable = false;
     img.classList.toggle('on', i === 0);
     if (frameFix) {
       const [scale, ty, tx] = frameFix[i];
@@ -688,6 +745,7 @@ function buildDragTurntable(elId, frameSources, frameFix) {
     el.appendChild(img);
     return img;
   });
+  if (lazyTrigger) observeLazyGroup(lazyTrigger, turnImgs);
 
   let turnFrame = 0;
   function setTurnFrame(frame) {
@@ -739,15 +797,18 @@ buildDragTurntable('concept-turn', FILL_FRAMES(0), FRAME_FIX_FILL[0]);
 // hero/gallery/rail thumbnail keep using the lower-res NOBG set, since
 // they're much smaller on screen and this crop-page turntable is the one
 // place the extra detail is actually visible.
-buildDragTurntable('concept-turn-2', HIRES_FRAMES(2), FRAME_FIX_HIRES[2]);
-buildDragTurntable('concept-turn-3', HIRES_FRAMES(3), FRAME_FIX_HIRES[3]);
-buildDragTurntable('concept-turn-4', HIRES_FRAMES(4), FRAME_FIX_HIRES[4]);
-buildDragTurntable('concept-turn-5', FILL_FRAMES(4), FRAME_FIX_FILL[4]);
-buildDragTurntable('concept-turn-6', FILL_FRAMES(5), FRAME_FIX_FILL[5]);
+buildDragTurntable('concept-turn-2', HIRES_FRAMES(2), FRAME_FIX_HIRES[2], lookTriggers(2));
+buildDragTurntable('concept-turn-3', HIRES_FRAMES(3), FRAME_FIX_HIRES[3], lookTriggers(3));
+buildDragTurntable('concept-turn-4', HIRES_FRAMES(4), FRAME_FIX_HIRES[4], lookTriggers(4));
+buildDragTurntable('concept-turn-5', FILL_FRAMES(4), FRAME_FIX_FILL[4], lookTriggers(5));
+buildDragTurntable('concept-turn-6', FILL_FRAMES(5), FRAME_FIX_FILL[5], lookTriggers(6));
 // mobile look turntables: the no-bg NOBG/FRAME_FIX set (same as the hero
 // figure and gallery grid) instead of each look's -fill/hires desktop
 // frames — mobile shows the model floating on the page's own white
-// background rather than the baked-in backdrop.
+// background rather than the baked-in backdrop. Left eager (unlike the
+// turntables above): these reuse the exact same NOBG URLs the hero/gallery
+// already loaded eagerly for all 6 looks, so there's no extra network cost
+// to gate behind a scroll trigger.
 for (let look = 1; look <= NL; look++) {
   buildDragTurntable(`concept-turn-mobile-${look}`, NOBG[look - 1], FRAME_FIX[look - 1]);
 }
@@ -785,20 +846,24 @@ buildPhotoLoop('preloader-photo', [
   'assets/images/concept-5-3.avif',
 ], 70);
 
-// tracks every real <img> on the page (everything built above has already
-// run by this point, so this sees the full set, both the ones written
-// directly in index.html and the ones created via new Image() throughout
-// this file) and snaps the preloader off (no fade) once they've all
-// settled — excludes the preloader's own cycling photo above, which isn't
-// page content to wait on. A percentage that only ever moves forward
-// reads better than one that can jump backward, so the displayed number
-// is clamped to the loaded/total ratio's running max.
+// tracks every real <img> on the page that's eager-loading (everything
+// built above has already run by this point, so this sees the full eager
+// set, both the ones written directly in index.html and the ones created
+// via new Image() throughout this file) and snaps the preloader off (no
+// fade) once they've all settled — excludes the preloader's own cycling
+// photo above (not page content to wait on) and every .lazy-img (look 2-6
+// and the about section's deferred assets — see the progressive-loading
+// section above; the preloader has no business waiting on images the
+// visitor hasn't scrolled to yet). A percentage that only ever moves
+// forward reads better than one that can jump backward, so the displayed
+// number is clamped to the loaded/total ratio's running max.
 (function initPreloader() {
   const preloaderEl = document.getElementById('preloader');
   const percentEl = document.getElementById('preloader-percent');
   if (!preloaderEl) return;
 
-  const imgs = [...document.querySelectorAll('img')].filter(img => !img.closest('#preloader'));
+  const imgs = [...document.querySelectorAll('img')]
+    .filter(img => !img.closest('#preloader') && !img.classList.contains('lazy-img'));
   const total = imgs.length || 1;
   let loaded = 0;
   let shownPercent = 0;
@@ -812,6 +877,11 @@ buildPhotoLoop('preloader-photo', [
   // but no longer: a real slow load should still just take as long as it
   // takes, this only pads out the fast case
   const MIN_VISIBLE_MS = 1000;
+  // one slow/stalled image (bad connection, a request that never settles)
+  // shouldn't hold the whole percentage — and the whole site — hostage: give
+  // each eager image this long to load, then count it as "settled" anyway
+  // and move on. It keeps trying in the background regardless.
+  const PER_IMAGE_TIMEOUT_MS = 3000;
 
   function finish() {
     preloaderEl.classList.add('preloader-hidden');
@@ -839,16 +909,16 @@ buildPhotoLoop('preloader-photo', [
   }
 
   imgs.forEach(img => {
-    if (img.complete) {
-      onSettle();
-    } else {
-      img.addEventListener('load', onSettle, { once: true });
-      img.addEventListener('error', onSettle, { once: true });
-    }
+    if (img.complete) { onSettle(); return; }
+    let settled = false;
+    const settleOnce = () => { if (settled) return; settled = true; onSettle(); };
+    img.addEventListener('load', settleOnce, { once: true });
+    img.addEventListener('error', settleOnce, { once: true });
+    setTimeout(settleOnce, PER_IMAGE_TIMEOUT_MS);
   });
 
-  // safety fallback so one stalled asset can't block the site forever
+  // absolute safety fallback in case something above never resolves at all
   setTimeout(() => {
     if (!preloaderEl.classList.contains('preloader-hidden')) finish();
-  }, 8000);
+  }, 5000);
 })();
