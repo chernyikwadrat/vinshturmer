@@ -671,6 +671,12 @@ function buildDragTurntable(elId, frameSources, frameFix) {
   const el = document.getElementById(elId);
   if (!el) return;
 
+  // desktop turntables carry the hint as a child; mobile turntables (whose
+  // image fills the box edge-to-edge via object-fit:cover, leaving no room
+  // for an overlay) instead have it as a flow sibling, before or after
+  const hintEl = el.querySelector('.turn-hint') ||
+    [el.previousElementSibling, el.nextElementSibling].find(sib => sib?.classList.contains('turn-hint'));
+
   const turnImgs = frameSources.map((src, i) => {
     const img = new Image();
     img.src = src; img.draggable = false;
@@ -699,6 +705,7 @@ function buildDragTurntable(elId, frameSources, frameFix) {
     turnDragStartFrame = turnFrame;
     el.setPointerCapture(e.pointerId);
     el.classList.add('active');
+    hintEl?.classList.add('turn-hint-hidden');
   });
 
   el.addEventListener('pointermove', e => {
@@ -710,6 +717,7 @@ function buildDragTurntable(elId, frameSources, frameFix) {
   const endTurnDrag = () => {
     turnDragging = false;
     el.classList.remove('active');
+    hintEl?.classList.remove('turn-hint-hidden');
   };
   el.addEventListener('pointerup', endTurnDrag);
   el.addEventListener('pointercancel', endTurnDrag);
