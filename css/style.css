@@ -786,6 +786,17 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
   letter-spacing:-.01em;text-align:center;text-transform:uppercase;color:#000;
   white-space:nowrap;
 }
+.contact-list{
+ 
+  margin-top:0;
+  display:flex;flex-direction:column;align-items:center;
+  font-family:'HN',sans-serif;font-weight:700;font-size:13px;
+  
+  letter-spacing:-.01em;text-align:center;text-transform:uppercase;
+  white-space:nowrap;
+  position: absolute;width:100%;top:40%;color: black; text-decoration: none;gap:4px;
+
+}
 
 .contact-sayhi{
   position:relative;left:auto;
@@ -818,6 +829,10 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
     font-family:'HN',sans-serif;font-weight:700;font-size:13px;
     letter-spacing:-.01em;text-transform:uppercase;color:#000;
     text-align:center;cursor:pointer;
+  }
+  .contact-list{
+    position: relative;
+    
   }
 
 }
