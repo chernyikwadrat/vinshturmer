@@ -3,17 +3,7 @@
 
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;background:#fff;}
-body{font-family:'HN',sans-serif;-webkit-font-smoothing:antialiased;transition:opacity .25s ease;}
-
-/* ── cross-page fade transition (index.html <-> gallery.html): an inline
-   script in <head> (see index.html/gallery.html) adds .pt-hide to <html>
-   before the stylesheet finishes blocking render, so the page's first
-   paint is already invisible instead of flashing fully-opaque first —
-   js/page-transition.js then removes it on a rAF to fade in, and re-adds
-   it before following a same-tab link to the other page, to fade out
-   first. No JS at all (or the script failing) just leaves body at its
-   normal opacity:1 default, so nothing ever gets stuck invisible. ── */
-html.pt-hide body{opacity:0;}
+body{font-family:'HN',sans-serif;-webkit-font-smoothing:antialiased;}
 
 /* click-dragging over the hero figure or any of the drag-to-rotate
    turntables (grid tiles, concept-page turntables) has no text to select,
