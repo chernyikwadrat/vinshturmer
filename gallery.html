@@ -5,10 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Vin Shturmer — Gallery</title>
 <link rel="stylesheet" href="css/style.css?v=202607130200">
-<!-- hides <body> (see html.pt-hide in style.css) before first paint, so
-     arriving here via the cross-page fade in js/page-transition.js doesn't
-     flash the fully-opaque page before fading in -->
-<script>document.documentElement.classList.add('pt-hide');</script>
+<!-- hides <body> (see html.pt-hide in style.css) before first paint, but
+     only when arriving via the cross-page fade in js/page-transition.js
+     (sessionStorage flag set right before that navigation) — a plain
+     direct load/refresh/bookmark never sets it, so the preloader shows the
+     instant CSS/HTML paint instead of waiting on this page's own scripts
+     to run first, which was adding a real, felt delay on slower phones -->
+<script>if (sessionStorage.getItem('pt-incoming')) { sessionStorage.removeItem('pt-incoming'); document.documentElement.classList.add('pt-hide'); }</script>
 </head>
 <body>
 
@@ -75,7 +78,8 @@
   <img class="gallery-photo-v" loading="lazy" src="assets/images/gallery/IMG_7830%201.avif"  alt="Look 31">
 </section>
 
-<script src="js/gallery-preloader.js?v=202607130200"></script>
+<!-- loaded first on purpose — see index.html's comment on the same reorder -->
 <script src="js/page-transition.js?v=202607130200"></script>
+<script src="js/gallery-preloader.js?v=202607130200"></script>
 </body>
 </html>

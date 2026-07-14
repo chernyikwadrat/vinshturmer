@@ -25,6 +25,12 @@ document.querySelectorAll('a[href]').forEach(a => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
     e.preventDefault();
     document.documentElement.classList.add('pt-hide');
+    // tells the next page's inline <head> script (see index.html/gallery.html)
+    // that this load came from our own fade-out and should fade in — a plain
+    // direct load/refresh/bookmark never sets this, so it skips pt-hide
+    // entirely and the preloader shows the instant CSS/HTML paint, with no
+    // JS-gated delay at all
+    sessionStorage.setItem('pt-incoming', '1');
     setTimeout(() => { window.location.href = a.href; }, PT_FADE_MS);
   });
 });

@@ -9,10 +9,13 @@
      on far longer than that, so without a changing URL a visitor's cached
      copy can survive many deploys past whatever's actually live -->
 <link rel="stylesheet" href="css/style.css?v=202607130200">
-<!-- hides <body> (see html.pt-hide in style.css) before first paint, so
-     arriving here via the cross-page fade in js/page-transition.js doesn't
-     flash the fully-opaque page before fading in -->
-<script>document.documentElement.classList.add('pt-hide');</script>
+<!-- hides <body> (see html.pt-hide in style.css) before first paint, but
+     only when arriving via the cross-page fade in js/page-transition.js
+     (sessionStorage flag set right before that navigation) — a plain
+     direct load/refresh/bookmark never sets it, so the preloader shows the
+     instant CSS/HTML paint instead of waiting on this page's own scripts
+     to run first, which was adding a real, felt delay on slower phones -->
+<script>if (sessionStorage.getItem('pt-incoming')) { sessionStorage.removeItem('pt-incoming'); document.documentElement.classList.add('pt-hide'); }</script>
 </head>
 <body>
 
@@ -356,13 +359,21 @@
       <span><a href="mailto:vin.shturmer@gmail.com?body=привет,красотка! есть предложение на кругленькую сумму, обсудим?" target="_blank">vin.shturmer@gmail.com</a></span>
     </div>
   </div>
-  <div class="contact-list">
+  <div class="contact-list" style="
+  bottom: 0px;
+  top: 0px;
+">
   <div class="contact-photo"><img src="assets/images/vin-photo.avif" alt="Vin Shturmer"></div>
   <p class="contact-sayhi"><a href="https://telegram.me/vinplu" target="_blank">Say hi</a></p>
 </div>
 </section>
 
-<script src="js/main.js?v=202607130200"></script>
+<!-- loaded before main.js on purpose: its fade-in (removing html.pt-hide)
+     shouldn't have to wait for main.js's much heavier synchronous work
+     (building every look's turntable/grid images etc.) to finish first —
+     on a slow mobile CPU that wait was stalling the preloader's own
+     appearance by the better part of a second -->
 <script src="js/page-transition.js?v=202607130200"></script>
+<script src="js/main.js?v=202607130200"></script>
 </body>
 </html>
