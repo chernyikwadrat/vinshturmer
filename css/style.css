@@ -559,9 +559,9 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
      in the markup (nav-left needs to visually land on the right here). */
   #header{padding:10px;font-size:13px;}
   #header .brand{position:static;transform:none;order:-1;}
-  #header .nav-left{display:flex;gap:10px;order:1;}
+  #header .nav-left{display:flex;gap:10px;}
   #header .nav-left a:nth-child(2){display:none;}
-  #header > a{display:none;}
+  
 
   /* the desktop's 3em letter-spacing is tuned for wide screens; at mobile
      widths it overflows the viewport and clips the text */
@@ -731,7 +731,9 @@ html[data-scroll-mode="scrub"] #concept-photo-6{
   .cmb-6-m1{left:44%;top:55.28%;width:73.35%;height:26.24%;}
   .cmb-6-slider{padding-top:calc(253.33 / 380 * 100%);margin-bottom: 10%;}
 }
-
+@media (max-width:360px){
+  #header .nav-left a:nth-child(1){display:none;}
+}
 /* ── contact / about the designer (1440x900 reference, single viewport) ──
    .contact-photo is dead-centered on the frame independently. .contact-text
    mirrors the Figma frame's own auto-layout: a flex column holding the bio
